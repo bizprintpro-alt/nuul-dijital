@@ -7,25 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==================== AUTH ====================
+// ===================== AUTH =====================
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
   email         String    @unique
-  emailVerified DateTime?
-  image         String?
+  name          String?
   phone         String?
   password      String?
-  role          Role      @default(USER)
+  image         String?
+  emailVerified DateTime?
+  role          UserRole  @default(CLIENT)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
-  orders        Order[]
   domains       Domain[]
   subscriptions Subscription[]
+  orders        Order[]
+  chatbots      ChatBot[]
+  crmLeads      CRMLead[]
+  tickets       Ticket[]
 
   @@map("users")
 }
@@ -70,41 +73,44 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ==================== DOMAINS ====================
+// ===================== DOMAINS =====================
 
 model Domain {
   id        String       @id @default(cuid())
-  name      String       @unique // e.g. "minii-biznes.mn"
-  tld       String       // e.g. ".mn", ".com", ".org"
-  status    DomainStatus @default(AVAILABLE)
+  name      String       @unique
+  tld       String
   userId    String?
+  status    DomainStatus @default(PENDING)
+  price     Int          // MNT
   expiresAt DateTime?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
   user  User?  @relation(fields: [userId], references: [id])
-  order Order?
+  order Order? @relation("DomainOrder")
 
+  @@index([userId])
   @@map("domains")
 }
 
-// ==================== HOSTING ====================
+// ===================== HOSTING =====================
 
 model HostingPlan {
-  id          String   @id @default(cuid())
-  name        String   // "Starter", "Business", "Enterprise"
-  slug        String   @unique
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  type        PlanType
   description String?
-  priceMonthly Int     // MNT, e.g. 9900
-  priceYearly  Int?    // MNT, discounted
-  storage     Int      // MB
-  websites    Int      // max websites
-  emails      Int      // max email accounts
-  bandwidth   Int?     // MB/month, null = unlimited
-  features    String[] // ["SSL", "Daily Backup", ...]
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  price       Int         // MNT/сар
+  priceYearly Int?        // MNT/жил
+  storage     Int         // GB
+  bandwidth   Int         // GB/сар, 0 = unlimited
+  websites    Int
+  emails      Int
+  features    String[]
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   subscriptions Subscription[]
 
@@ -116,36 +122,38 @@ model Subscription {
   userId    String
   planId    String
   status    SubscriptionStatus @default(ACTIVE)
-  startDate DateTime           @default(now())
-  endDate   DateTime
+  startAt   DateTime           @default(now())
+  endAt     DateTime
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
 
   user  User        @relation(fields: [userId], references: [id])
   plan  HostingPlan @relation(fields: [planId], references: [id])
-  order Order?
+  order Order?      @relation("SubscriptionOrder")
 
+  @@index([userId])
   @@map("subscriptions")
 }
 
-// ==================== ORDERS & PAYMENTS ====================
+// ===================== ORDERS & PAYMENTS =====================
 
 model Order {
-  id             String        @id @default(cuid())
+  id             String      @id @default(cuid())
   userId         String
-  domainId       String?       @unique
-  subscriptionId String?       @unique
+  domainId       String?     @unique
+  subscriptionId String?     @unique
   type           OrderType
-  amount         Int           // MNT
-  status         OrderStatus   @default(PENDING)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  amount         Int         // MNT
+  status         OrderStatus @default(PENDING)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   user         User          @relation(fields: [userId], references: [id])
-  domain       Domain?       @relation(fields: [domainId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  domain       Domain?       @relation("DomainOrder", fields: [domainId], references: [id])
+  subscription Subscription? @relation("SubscriptionOrder", fields: [subscriptionId], references: [id])
   payment      Payment?
 
+  @@index([userId])
   @@map("orders")
 }
 
@@ -153,11 +161,11 @@ model Payment {
   id            String        @id @default(cuid())
   orderId       String        @unique
   method        PaymentMethod
-  transactionId String?       // QPay or SocialPay transaction ID
+  transactionId String?
   amount        Int           // MNT
   status        PaymentStatus @default(PENDING)
-  qpayInvoiceId String?       // QPay invoice ID
-  qpayQrCode    String?       @db.Text // QPay QR code data
+  qpayInvoiceId String?
+  qpayQrCode    String?       @db.Text
   paidAt        DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -167,23 +175,88 @@ model Payment {
   @@map("payments")
 }
 
-// ==================== ENUMS ====================
+// ===================== AI CHATBOT =====================
 
-enum Role {
-  USER
+model ChatBot {
+  id        String          @id @default(cuid())
+  userId    String
+  name      String
+  platform  ChatBotPlatform
+  flowJson  String          @db.Text // JSON flow definition
+  isActive  Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("chatbots")
+}
+
+// ===================== CRM =====================
+
+model CRMLead {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  stage     LeadStage @default(NEW)
+  value     Int?      // MNT
+  notes     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("crm_leads")
+}
+
+// ===================== SUPPORT =====================
+
+model Ticket {
+  id         String       @id @default(cuid())
+  userId     String
+  subject    String
+  message    String       @db.Text
+  status     TicketStatus @default(OPEN)
+  priority   Priority     @default(MEDIUM)
+  aiResolved Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("tickets")
+}
+
+// ===================== ENUMS =====================
+
+enum UserRole {
   ADMIN
+  CLIENT
+  RESELLER
 }
 
 enum DomainStatus {
   AVAILABLE
-  REGISTERED
+  PENDING
+  ACTIVE
   EXPIRED
   TRANSFERRING
 }
 
+enum PlanType {
+  STARTER
+  BUSINESS
+  ENTERPRISE
+}
+
 enum SubscriptionStatus {
   ACTIVE
-  INACTIVE
   CANCELLED
   EXPIRED
 }
@@ -191,12 +264,15 @@ enum SubscriptionStatus {
 enum OrderType {
   DOMAIN
   HOSTING
+  CHATBOT
+  CRM
   DOMAIN_AND_HOSTING
 }
 
 enum OrderStatus {
   PENDING
   PAID
+  FAILED
   CANCELLED
   REFUNDED
 }
@@ -204,6 +280,7 @@ enum OrderStatus {
 enum PaymentMethod {
   QPAY
   SOCIALPAY
+  CARD
   BANK_TRANSFER
 }
 
@@ -212,4 +289,34 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum ChatBotPlatform {
+  FACEBOOK
+  WEB
+  VIBER
+  TELEGRAM
+}
+
+enum LeadStage {
+  NEW
+  CONTACTED
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
