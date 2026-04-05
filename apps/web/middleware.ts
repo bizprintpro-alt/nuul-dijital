@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Admin routes require ADMIN role
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/dashboard/admin")) {
     if (token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
@@ -55,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

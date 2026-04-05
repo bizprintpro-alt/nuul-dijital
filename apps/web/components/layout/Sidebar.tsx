@@ -45,10 +45,10 @@ const navGroups = [
   {
     group: "АДМИН",
     items: [
-      { label: "Админ панел", href: "/admin", icon: "Shield" },
-      { label: "Хэрэглэгчид", href: "/admin/users", icon: "Users" },
-      { label: "Захиалгууд", href: "/admin/orders", icon: "ShoppingCart" },
-      { label: "Домэйнууд", href: "/admin/domains", icon: "Globe" },
+      { label: "Админ панел", href: "/dashboard/admin", icon: "Shield" },
+      { label: "Хэрэглэгчид", href: "/dashboard/admin/users", icon: "Users" },
+      { label: "Захиалгууд", href: "/dashboard/admin/orders", icon: "ShoppingCart" },
+      { label: "Домэйнууд", href: "/dashboard/admin/domains", icon: "Globe" },
     ],
   },
   {
