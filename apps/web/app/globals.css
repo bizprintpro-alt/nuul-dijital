@@ -3,11 +3,109 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+  --v: #7B6FFF;
+  --vd: #5A4FD4;
+  --vs: #A89FFF;
+  --vg: #C4BFFF;
+  --t: #00E5B8;
+  --td: #00B892;
+  --bg: #03030A;
+  --bg2: #08081A;
+  --bg3: #0D0D22;
+  --bg4: #13132E;
+  --bg5: #1A1A3A;
+  --txt: #EEECff;
+  --txt2: #8B89BB;
+  --txt3: #3D3B6E;
+  --txt4: #25244A;
+  --bd: #FFFFFF09;
+  --bdv: #7B6FFF28;
+  --bdt: #00E5B820;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  font-family: "Cabinet Grotesk", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  overflow-x: hidden;
+}
+
+/* Noise overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Grid background */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(var(--bd) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bd) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    black 40%,
+    transparent 100%
+  );
+}
+
+/* Gradient text helper */
+.text-gradient-v-t {
+  background: linear-gradient(135deg, var(--v) 0%, var(--t) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-txt-vg {
+  background: linear-gradient(135deg, var(--txt), var(--vg));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Service card hover effects */
+.svc-card:hover .svc-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* Pricing card glow line */
+.pc-feat::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--v), transparent);
+}
+
+/* Search input focus */
+.search-input:focus {
+  border-color: var(--v);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 3px #7b6fff12;
 }
