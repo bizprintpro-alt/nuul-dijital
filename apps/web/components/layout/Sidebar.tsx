@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, ChevronLeft,
+  Shield,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
-  Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones,
+  Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield,
 };
 
 const navGroups = [
@@ -39,6 +40,15 @@ const navGroups = [
       { label: "AI Чатбот Builder", href: "/dashboard/chatbot", icon: "Bot", badge: "AI" },
       { label: "CRM & Борлуулалт", href: "/dashboard/crm", icon: "Users" },
       { label: "Call Center 24/7", href: "/dashboard/call-center", icon: "Phone" },
+    ],
+  },
+  {
+    group: "АДМИН",
+    items: [
+      { label: "Админ панел", href: "/admin", icon: "Shield" },
+      { label: "Хэрэглэгчид", href: "/admin/users", icon: "Users" },
+      { label: "Захиалгууд", href: "/admin/orders", icon: "ShoppingCart" },
+      { label: "Домэйнууд", href: "/admin/domains", icon: "Globe" },
     ],
   },
   {

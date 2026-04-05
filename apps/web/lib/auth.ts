@@ -1,43 +1,102 @@
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { compare } from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
+/* ------------------------------------------------------------------ */
+/*  NextAuth type augmentation                                        */
+/* ------------------------------------------------------------------ */
+declare module "next-auth" {
+  interface User {
+    role?: string;
+  }
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role: string;
+    };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    role: string;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Auth options                                                      */
+/* ------------------------------------------------------------------ */
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
+
     CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Имэйл", type: "email" },
         password: { label: "Нууц үг", type: "password" },
       },
+
       async authorize(credentials) {
-        // TODO: Prisma-тай холбож, bcrypt password шалгах
-        if (
-          credentials?.email === "admin@nuul.mn" &&
-          credentials?.password === "password"
-        ) {
-          return { id: "1", name: "Admin", email: "admin@nuul.mn", role: "ADMIN" };
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Имэйл болон нууц үг оруулна уу");
         }
-        return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email.toLowerCase().trim() },
+        });
+
+        if (!user || !user.password) {
+          throw new Error("Имэйл эсвэл нууц үг буруу байна");
+        }
+
+        const passwordValid = await compare(credentials.password, user.password);
+
+        if (!passwordValid) {
+          throw new Error("Имэйл эсвэл нууц үг буруу байна");
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
+        };
       },
     }),
   ],
+
   session: { strategy: "jwt" },
-  pages: { signIn: "/auth/signin" },
+
+  pages: {
+    signIn: "/auth/signin",
+  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role ?? "CLIENT";
+        token.id = user.id;
+        token.role = (user as User).role ?? "CLIENT";
       }
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string }).role = token.role as string;
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.name = token.name ?? null;
       }
       return session;
     },
