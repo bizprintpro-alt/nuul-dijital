@@ -13,6 +13,7 @@ import {
   X,
   Loader2,
   TicketIcon,
+  Sparkles,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc-client";
 
@@ -21,6 +22,14 @@ interface ChatMessage {
   role: "ai" | "user";
   content: string;
 }
+
+/* ─── quick suggestions ─── */
+const quickSuggestions = [
+  "Домэйн яаж бүртгэх вэ?",
+  "SSL тохиргоо",
+  "QPay холболт",
+  "Вэбсайт удаан",
+];
 
 /* ─── page ─── */
 export default function SupportPage() {
@@ -33,12 +42,13 @@ export default function SupportPage() {
     {
       role: "ai",
       content:
-        "Сайн байна уу! Би Nuul AI туслах. Домэйн, хостинг, чатбот, төлбөр — ямар ч асуулт байсан асуугаарай!",
+        "Сайн байна уу! Би Nuul AI туслах. Домэйн, хостинг, чатбот, төлбөр — ямар ч асуулт байсан асуугаарай! Доорх товчлууруудаас сонгож эсвэл шууд бичиж болно.",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /* ── ticket state ── */
   const [showModal, setShowModal] = useState(false);
@@ -67,21 +77,37 @@ export default function SupportPage() {
     }
   }, [messages, isLoading]);
 
-  /* ── send message ── */
-  const sendMessage = async () => {
-    const text = input.trim();
-    if (!text || isLoading) return;
+  /* ── auto-resize textarea ── */
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  }, [input]);
 
-    const userMsg: ChatMessage = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+  /* ── send message ── */
+  const sendMessage = async (text?: string) => {
+    const msg = (text ?? input).trim();
+    if (!msg || isLoading) return;
+
+    const userMsg: ChatMessage = { role: "user", content: msg };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setInput("");
     setIsLoading(true);
 
     try {
+      // Send history (last 10 messages for context)
+      const history = newMessages.slice(-11, -1).map((m) => ({
+        role: m.role === "ai" ? "assistant" : "user",
+        content: m.content,
+      }));
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: msg, history }),
       });
       const data = await res.json();
       setMessages((prev) => [
@@ -102,7 +128,7 @@ export default function SupportPage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -220,19 +246,27 @@ export default function SupportPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* ═══ LEFT: AI Chat ═══ */}
         <div className="lg:col-span-3">
-          <div className="flex h-[600px] flex-col rounded-2xl border border-white/[0.04] bg-bg-2">
+          <div className="flex h-[650px] flex-col rounded-2xl border border-white/[0.04] bg-bg-2">
             {/* Chat header */}
             <div className="flex items-center gap-3 border-b border-white/[0.04] p-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-v/10">
                 <Bot size={16} className="text-v" />
               </div>
               <div className="flex-1">
-                <div className="text-[13px] font-semibold text-txt">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-txt">
                   Nuul AI Туслах
+                  <span className="rounded bg-v/10 px-1.5 py-0.5 text-[9px] font-bold text-v">
+                    GPT
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-t">
-                  <span className="h-1.5 w-1.5 rounded-full bg-t" /> Онлайн
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-t" />{" "}
+                  Онлайн
                 </div>
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-txt-3">
+                <Sparkles size={12} className="text-v/50" />
+                AI дэмжлэг
               </div>
             </div>
 
@@ -263,7 +297,7 @@ export default function SupportPage() {
                 )
               )}
 
-              {/* Loading indicator */}
+              {/* Loading indicator — bouncing dots */}
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-v/10 text-[10px] font-bold text-v">
@@ -280,22 +314,39 @@ export default function SupportPage() {
               )}
             </div>
 
+            {/* Quick suggestions */}
+            {messages.length <= 2 && (
+              <div className="flex flex-wrap gap-2 border-t border-white/[0.04] px-4 pt-3">
+                {quickSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => sendMessage(suggestion)}
+                    disabled={isLoading}
+                    className="rounded-lg border border-v/20 bg-v/5 px-3 py-1.5 text-[11px] font-medium text-v transition-all hover:bg-v/10 hover:border-v/30 disabled:opacity-40"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Input area */}
             <div className="border-t border-white/[0.04] p-4">
               <div className="flex gap-2">
-                <input
-                  type="text"
+                <textarea
+                  ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Асуултаа бичнэ үү..."
+                  placeholder="Асуултаа бичнэ үү... (Shift+Enter шинэ мөр)"
                   disabled={isLoading}
-                  className="flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-[13px] text-txt outline-none placeholder:text-txt-3 focus:border-v/30 disabled:opacity-50"
+                  rows={1}
+                  className="flex-1 resize-none rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-[13px] text-txt outline-none placeholder:text-txt-3 focus:border-v/30 disabled:opacity-50"
                 />
                 <button
-                  onClick={sendMessage}
+                  onClick={() => sendMessage()}
                   disabled={isLoading || !input.trim()}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-v text-white transition-all hover:shadow-[0_0_16px_rgba(108,99,255,0.3)] disabled:opacity-40"
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-v text-white transition-all hover:shadow-[0_0_16px_rgba(108,99,255,0.3)] disabled:opacity-40"
                 >
                   {isLoading ? (
                     <Loader2 size={15} className="animate-spin" />
@@ -306,7 +357,7 @@ export default function SupportPage() {
               </div>
 
               {/* Create ticket from chat button */}
-              {messages.length > 1 && (
+              {messages.length > 2 && (
                 <button
                   onClick={createTicketFromChat}
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] py-2 text-[12px] text-txt-2 transition-all hover:border-v/20 hover:text-v"
@@ -341,7 +392,7 @@ export default function SupportPage() {
             </div>
 
             {/* Ticket list */}
-            <div className="max-h-[500px] space-y-2 overflow-y-auto">
+            <div className="max-h-[540px] space-y-2 overflow-y-auto">
               {ticketsQuery.isLoading && (
                 <div className="flex items-center justify-center py-12">
                   <Loader2

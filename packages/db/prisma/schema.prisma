@@ -28,9 +28,11 @@ model User {
   domains       Domain[]
   subscriptions Subscription[]
   orders        Order[]
-  chatbots      ChatBot[]
-  crmLeads      CRMLead[]
-  tickets       Ticket[]
+  chatbots        ChatBot[]
+  crmLeads        CRMLead[]
+  tickets         Ticket[]
+  hostingAccounts HostingAccount[]
+  chatMessages    ChatMessage[]
 
   @@map("users")
 }
@@ -235,6 +237,54 @@ model Ticket {
   @@map("tickets")
 }
 
+// ===================== HOSTING =====================
+
+model HostingAccount {
+  id        String        @id @default(cuid())
+  userId    String
+  serverId  Int           // Hetzner server ID
+  serverIp  String?
+  status    HostingStatus @default(PROVISIONING)
+  planType  PlanType
+  domain    String?
+  expiresAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("hosting_accounts")
+}
+
+// ===================== CHAT MESSAGES =====================
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  ticketId  String?
+  role      String   // 'user' | 'assistant'
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([ticketId])
+  @@map("chat_messages")
+}
+
+model ChatBotSession {
+  id        String   @id @default(cuid())
+  botId     String
+  visitorId String
+  messages  Json     // array of {role, content}
+  createdAt DateTime @default(now())
+
+  @@index([botId])
+  @@map("chatbot_sessions")
+}
+
 // ===================== ENUMS =====================
 
 enum UserRole {
@@ -321,4 +371,11 @@ enum Priority {
   MEDIUM
   HIGH
   URGENT
+}
+
+enum HostingStatus {
+  PROVISIONING
+  ACTIVE
+  SUSPENDED
+  DELETED
 }
