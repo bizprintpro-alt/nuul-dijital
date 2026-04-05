@@ -1,4 +1,0 @@
-{
-  "buildCommand": "cd ../.. && pnpm --filter @nuul/db exec prisma generate && pnpm --filter @nuul/web build",
-  "installCommand": "cd ../.. && pnpm install"
-}
