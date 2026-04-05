@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nuul.mn — Таны дижитал үүл</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --v:#7B6FFF;--vd:#5A4FD4;--vs:#A89FFF;--vg:#C4BFFF;
+  --t:#00E5B8;--td:#00B892;--tg:#00E5B820;
+  --bg:#03030A;--bg2:#08081A;--bg3:#0D0D22;--bg4:#13132E;--bg5:#1A1A3A;
+  --txt:#EEECff;--txt2:#8B89BB;--txt3:#3D3B6E;--txt4:#25244A;
+  --bd:#FFFFFF09;--bdv:#7B6FFF28;--bdt:#00E5B820;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Cabinet Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;cursor:none;}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:8px;height:8px;background:var(--v);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .15s,background .2s;mix-blend-mode:screen;}
+#cur2{position:fixed;width:28px;height:28px;border:1px solid #7B6FFF50;border-radius:50%;pointer-events:none;z-index:9998;transition:all .08s;mix-blend-mode:normal;}
+
+/* ── NOISE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:1000;}
+
+/* ── MESH BG ── */
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.m1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,#7B6FFF22 0%,transparent 65%);top:-200px;left:-150px;animation:drift1 18s ease-in-out infinite;}
+.m2{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,#00E5B815 0%,transparent 65%);bottom:-150px;right:-100px;animation:drift2 22s ease-in-out infinite;}
+.m3{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,#7B6FFF18 0%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);animation:drift3 15s ease-in-out infinite;}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,60px) scale(1.1)}66%{transform:translate(-40px,100px) scale(.95)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-70px,-80px) scale(1.05)}66%{transform:translate(50px,-30px) scale(1.1)}}
+@keyframes drift3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.3)}}
+
+/* ── GRID BG ── */
+.grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 40%,transparent 100%);}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:0 48px;height:66px;display:flex;align-items:center;justify-content:space-between;}
+nav::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#03030ACC 0%,transparent 100%);backdrop-filter:blur(0px);}
+nav::after{content:'';position:absolute;bottom:0;left:48px;right:48px;height:1px;background:linear-gradient(90deg,transparent,var(--bdv),transparent);}
+.nav-logo{position:relative;z-index:1;display:flex;align-items:center;gap:11px;text-decoration:none;}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--v),var(--vd));display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px #7B6FFF40,inset 0 1px 0 #FFFFFF20;}
+.logo-word{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.5px;}
+.logo-word span{color:var(--vs);}
+.nav-links{position:relative;z-index:1;display:flex;gap:0;}
+.nav-link{font-size:13px;color:var(--txt2);text-decoration:none;padding:8px 18px;border-radius:8px;transition:all .2s;position:relative;}
+.nav-link:hover{color:var(--txt);}
+.nav-link:hover::before{opacity:1;}
+.nav-link::before{content:'';position:absolute;inset:0;background:#FFFFFF06;border-radius:8px;opacity:0;transition:opacity .2s;}
+.nav-r{position:relative;z-index:1;display:flex;align-items:center;gap:8px;}
+.lang-pill{font-size:11px;font-weight:500;color:var(--txt3);background:var(--bg4);border:1px solid var(--bd);padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;letter-spacing:.04em;}
+.lang-pill:hover{color:var(--txt2);border-color:var(--bdv);}
+.btn-ghost{font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:500;color:var(--txt2);background:transparent;border:1px solid var(--bd);padding:8px 20px;border-radius:9px;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{color:var(--txt);border-color:var(--bdv);}
+.btn-primary{font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--v) 0%,var(--vd) 100%);border:none;padding:9px 22px;border-radius:9px;cursor:pointer;transition:all .2s;box-shadow:0 0 20px #7B6FFF35;position:relative;overflow:hidden;}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#FFFFFF20,transparent);opacity:0;transition:opacity .2s;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 32px #7B6FFF55;}
+.btn-primary:hover::before{opacity:1;}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 48px 80px;}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:#7B6FFF12;border:1px solid #7B6FFF35;color:var(--vs);font-size:11.5px;font-weight:500;padding:6px 16px;border-radius:20px;margin-bottom:28px;letter-spacing:.04em;animation:fadeUp .8s ease both;}
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--t);box-shadow:0 0 8px var(--t);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+
+.hero-h1{font-family:'Clash Display',sans-serif;font-size:clamp(48px,7vw,88px);font-weight:700;line-height:1.0;letter-spacing:-3px;margin-bottom:24px;animation:fadeUp .8s .1s ease both;}
+.h1-line1{display:block;color:var(--txt);}
+.h1-line2{display:block;background:linear-gradient(135deg,var(--v) 0%,var(--t) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.h1-line3{display:block;color:var(--txt);opacity:.45;font-size:.65em;}
+
+.hero-sub{font-size:16px;color:var(--txt2);line-height:1.8;margin-bottom:40px;max-width:520px;font-weight:400;animation:fadeUp .8s .2s ease both;}
+
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:64px;animation:fadeUp .8s .3s ease both;}
+.cta-main{font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--v),var(--vd));border:none;padding:14px 34px;border-radius:12px;cursor:pointer;transition:all .25s;box-shadow:0 0 30px #7B6FFF40,inset 0 1px 0 #FFFFFF25;display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;}
+.cta-main::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#00000020,transparent);pointer-events:none;}
+.cta-main:hover{transform:translateY(-2px);box-shadow:0 8px 40px #7B6FFF50;}
+.cta-sec{font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:500;color:var(--txt2);background:var(--bg3);border:1px solid var(--bdv);padding:14px 34px;border-radius:12px;cursor:pointer;transition:all .25s;}
+.cta-sec:hover{color:var(--txt);border-color:var(--v);background:var(--bg4);}
+
+/* ── STATS ── */
+.stats-row{display:flex;gap:0;justify-content:center;animation:fadeUp .8s .4s ease both;border:1px solid var(--bdv);border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#7B6FFF08,#00E5B806);backdrop-filter:blur(8px);}
+.stat{padding:22px 36px;text-align:center;position:relative;}
+.stat+.stat::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:1px;background:linear-gradient(180deg,transparent,var(--bdv),transparent);}
+.stat-n{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;letter-spacing:-1px;background:linear-gradient(135deg,var(--txt),var(--vs));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-l{font-size:11px;color:var(--txt3);margin-top:3px;letter-spacing:.04em;font-weight:500;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-ind{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;animation:fadeUp .8s .6s ease both;}
+.scroll-line{width:1px;height:40px;background:linear-gradient(180deg,var(--bdv),transparent);animation:scroll-anim 2s ease infinite;}
+@keyframes scroll-anim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.scroll-txt{font-size:10px;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── MARQUEE ── */
+.marquee-wrap{position:relative;z-index:2;border-top:1px solid var(--bdv);border-bottom:1px solid var(--bdv);padding:18px 0;overflow:hidden;background:linear-gradient(135deg,#7B6FFF06,transparent);}
+.marquee{display:flex;gap:0;white-space:nowrap;animation:marquee 28s linear infinite;}
+.marquee-item{display:inline-flex;align-items:center;gap:12px;padding:0 32px;font-size:12px;font-weight:500;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.marquee-dot{width:4px;height:4px;border-radius:50%;background:var(--v);}
+.marquee-hi{color:var(--vs);}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── SERVICES ── */
+.services{position:relative;z-index:2;padding:96px 48px;}
+.section-eyebrow{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--v);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-eyebrow::before{content:'';width:24px;height:1px;background:var(--v);}
+.section-h2{font-family:'Clash Display',sans-serif;font-size:clamp(32px,4vw,48px);font-weight:700;letter-spacing:-1.5px;margin-bottom:12px;line-height:1.1;}
+.section-sub{font-size:15px;color:var(--txt2);max-width:500px;line-height:1.7;margin-bottom:56px;}
+
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border-radius:20px;overflow:hidden;border:1px solid var(--bdv);}
+.svc-card{padding:36px 32px;background:var(--bg2);position:relative;overflow:hidden;cursor:pointer;transition:background .3s;}
+.svc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#7B6FFF08,transparent);opacity:0;transition:opacity .3s;}
+.svc-card:hover{background:var(--bg3);}
+.svc-card:hover::before{opacity:1;}
+.svc-card:hover .svc-icon-wrap{transform:scale(1.05);box-shadow:0 0 20px var(--svc-glow);}
+.svc-card:hover .svc-arrow{opacity:1;transform:translate(2px,-2px);}
+.svc-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;transition:all .3s;border:1px solid transparent;}
+.svc-name{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.5px;margin-bottom:8px;}
+.svc-desc{font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:16px;}
+.svc-tag{display:inline-flex;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;color:var(--txt3);}
+.svc-arrow{position:absolute;top:32px;right:32px;width:20px;height:20px;color:var(--txt3);opacity:0;transition:all .2s;}
+
+/* ── DOMAIN SEARCH ── */
+.domain-sec{position:relative;z-index:2;padding:96px 48px;max-width:900px;margin:0 auto;}
+.search-wrap{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--bdv);border-radius:24px;padding:56px 48px;position:relative;overflow:hidden;}
+.search-wrap::before{content:'';position:absolute;top:-1px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--v),transparent);}
+.search-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#7B6FFF15,transparent 70%);pointer-events:none;}
+.search-h{font-family:'Clash Display',sans-serif;font-size:36px;font-weight:700;letter-spacing:-1px;margin-bottom:8px;position:relative;z-index:1;}
+.search-s{font-size:14px;color:var(--txt2);margin-bottom:32px;position:relative;z-index:1;}
+.search-box{display:flex;gap:10px;margin-bottom:16px;position:relative;z-index:1;}
+.search-input{flex:1;background:#FFFFFF07;border:1px solid #FFFFFF12;border-radius:12px;padding:14px 20px;font-size:15px;font-family:'Cabinet Grotesk',sans-serif;color:var(--txt);outline:none;transition:all .25s;}
+.search-input::placeholder{color:var(--txt3);}
+.search-input:focus{border-color:var(--v);background:#FFFFFF0A;box-shadow:0 0 0 3px #7B6FFF12;}
+.search-btn{font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--v),var(--vd));border:none;padding:14px 28px;border-radius:12px;cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:0 0 20px #7B6FFF30;}
+.search-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px #7B6FFF50;}
+.tld-row{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1;}
+.tld-pill{background:#FFFFFF05;border:1px solid var(--bd);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--txt3);cursor:pointer;transition:all .2s;}
+.tld-pill:hover{border-color:var(--bdv);color:var(--vs);}
+.tld-pill b{color:var(--vs);}
+.search-results{margin-top:16px;border:1px solid var(--bdv);border-radius:14px;overflow:hidden;display:none;position:relative;z-index:1;background:var(--bg);}
+.dr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--bd);font-size:12px;}
+.dr:last-child{border-bottom:none;}
+.dr:hover{background:#FFFFFF02;}
+
+/* ── PRICING ── */
+.pricing{position:relative;z-index:2;padding:96px 48px;}
+.price-grid{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:16px;align-items:start;}
+.pc{background:var(--bg2);border:1px solid var(--bd);border-radius:20px;padding:32px;transition:transform .3s,box-shadow .3s;}
+.pc:hover{transform:translateY(-4px);}
+.pc.feat{background:linear-gradient(160deg,var(--bg3),var(--bg4));border:1px solid var(--bdv);box-shadow:0 0 40px #7B6FFF18;position:relative;overflow:hidden;}
+.pc.feat::before{content:'';position:absolute;top:-1px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(--v),transparent);}
+.pc.feat:hover{transform:translateY(-6px);box-shadow:0 12px 50px #7B6FFF25;}
+.pc-eyebrow{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vs);background:#7B6FFF18;border:1px solid #7B6FFF25;padding:4px 10px;border-radius:5px;display:inline-block;margin-bottom:16px;}
+.pc-name{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:600;margin-bottom:8px;letter-spacing:-.3px;}
+.pc-price{font-family:'Clash Display',sans-serif;font-size:38px;font-weight:700;letter-spacing:-2px;margin-bottom:4px;background:linear-gradient(135deg,var(--txt),var(--vg));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pc-price span{font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:400;-webkit-text-fill-color:var(--txt2);color:var(--txt2);}
+.pc-desc{font-size:12px;color:var(--txt3);margin-bottom:24px;line-height:1.5;}
+.pc-div{height:1px;background:linear-gradient(90deg,transparent,var(--bdv),transparent);margin-bottom:20px;}
+.pc-features{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.pc-feat-item{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--txt2);}
+.chk{width:16px;height:16px;border-radius:5px;background:#00E5B815;border:1px solid #00E5B830;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pc-btn{width:100%;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;padding:12px;border-radius:10px;cursor:pointer;transition:all .2s;}
+.pc-btn-v{background:linear-gradient(135deg,var(--v),var(--vd));color:#fff;border:none;box-shadow:0 0 20px #7B6FFF30;}
+.pc-btn-v:hover{box-shadow:0 0 30px #7B6FFF50;transform:translateY(-1px);}
+.pc-btn-o{background:transparent;color:var(--vs);border:1px solid var(--bdv);}
+.pc-btn-o:hover{background:#7B6FFF0D;border-color:var(--v);}
+
+/* ── TESTIMONIALS ── */
+.testi{position:relative;z-index:2;padding:96px 48px;}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.tc{background:var(--bg2);border:1px solid var(--bd);border-radius:18px;padding:28px;transition:all .3s;position:relative;overflow:hidden;}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--bdv),transparent);opacity:0;transition:opacity .3s;}
+.tc:hover{border-color:var(--bdv);transform:translateY(-3px);}
+.tc:hover::before{opacity:1;}
+.tc-quote{font-size:28px;color:var(--bdv);font-family:Georgia,serif;line-height:1;margin-bottom:12px;}
+.tc-text{font-size:13px;color:var(--txt2);line-height:1.75;margin-bottom:20px;}
+.tc-author{display:flex;align-items:center;gap:11px;}
+.tc-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid transparent;}
+.tc-name{font-size:13px;font-weight:600;}.tc-role{font-size:11px;color:var(--txt3);}
+.stars{display:flex;gap:3px;margin-bottom:14px;}
+.star{width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,var(--t),var(--td));}
+
+/* ── CTA SECTION ── */
+.cta-section{position:relative;z-index:2;padding:96px 48px;}
+.cta-inner{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);border:1px solid var(--bdv);border-radius:28px;padding:72px 48px;text-align:center;max-width:720px;margin:0 auto;position:relative;overflow:hidden;}
+.cta-inner::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,var(--v),var(--t),transparent);}
+.cta-glow1{position:absolute;top:50%;left:20%;transform:translate(-50%,-50%);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#7B6FFF15,transparent 70%);pointer-events:none;}
+.cta-glow2{position:absolute;top:50%;right:0%;transform:translate(50%,-50%);width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,#00E5B812,transparent 70%);pointer-events:none;}
+.cta-h{font-family:'Clash Display',sans-serif;font-size:48px;font-weight:700;letter-spacing:-2px;margin-bottom:14px;line-height:1.05;position:relative;z-index:1;}
+.cta-h span{background:linear-gradient(135deg,var(--v),var(--t));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cta-sub{font-size:15px;color:var(--txt2);margin-bottom:32px;line-height:1.65;position:relative;z-index:1;}
+.cta-btns{display:flex;gap:12px;justify-content:center;position:relative;z-index:1;}
+.cta-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3);margin-top:20px;position:relative;z-index:1;}
+.cta-badge svg{color:var(--t);}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:2;border-top:1px solid var(--bd);padding:32px 48px;display:flex;align-items:center;justify-content:space-between;}
+.footer-logo{display:flex;align-items:center;gap:10px;}
+.foot-links{display:flex;gap:0;}
+.foot-link{font-size:12px;color:var(--txt3);text-decoration:none;padding:4px 14px;transition:color .2s;cursor:pointer;}
+.foot-link:hover{color:var(--txt2);}
+.foot-cr{font-size:11px;color:var(--txt4);}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+.reveal-l{opacity:0;transform:translateX(-32px);transition:opacity .7s ease,transform .7s ease;}
+.reveal-l.in{opacity:1;transform:translateX(0);}
+
+/* ── DOMAIN RESULT ── */
+.dr-available{color:var(--t);font-weight:600;}
+.dr-taken{color:#FF6B6B;}
+.dr-domain{font-weight:500;color:var(--txt);}
+.dr-price{color:var(--txt2);}
+.btn-order{font-family:'Cabinet Grotesk',sans-serif;font-size:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--v),var(--vd));border:none;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-order:hover{box-shadow:0 0 16px #7B6FFF40;}
+.btn-taken{font-size:11px;color:var(--txt3);}
+
+/* ── HOVER CARD EFFECT ── */
+@property --angle{syntax:'<angle>';initial-value:0deg;inherits:false;}
+</style>
+</head>
+<body>
+
+<!-- cursor -->
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<!-- bg -->
+<div class="mesh"><div class="m1"></div><div class="m2"></div><div class="m3"></div></div>
+<div class="grid-bg"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+        <path d="M9 2L16 14H2Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45"/>
+        <circle cx="9" cy="9" r="1.6" fill="#fff"/>
+      </svg>
+    </div>
+    <span class="logo-word">nuul<span>.mn</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#svc">Үйлчилгээ</a>
+    <a class="nav-link" href="#domain">Домэйн</a>
+    <a class="nav-link" href="#price">Үнэ</a>
+    <a class="nav-link" href="#testi">Харилцагчид</a>
+  </div>
+  <div class="nav-r">
+    <button class="lang-pill" id="lb" onclick="toggleLang()">EN</button>
+    <button class="btn-ghost" onclick="goDash()">Нэвтрэх</button>
+    <button class="btn-primary" onclick="goDash()">Эхлэх →</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="eyebrow">
+    <div class="eyebrow-dot"></div>
+    <span id="hbadge">Монголын анхны AI-powered платформ</span>
+  </div>
+
+  <h1 class="hero-h1">
+    <span class="h1-line1" id="hl1">Таны бизнесийн</span>
+    <span class="h1-line2" id="hl2">дижитал үүл</span>
+    <span class="h1-line3" id="hl3">Домэйн · Хост · Вэб · CRM · AI</span>
+  </h1>
+
+  <p class="hero-sub" id="hsub">
+    Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ.<br/>
+    Бүгдийг нэг дороос. Автомат. Хялбар. 24/7.
+  </p>
+
+  <div class="hero-cta">
+    <button class="cta-main" onclick="goDash()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8L8 14M14 8H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="cta1">Үнэгүй эхлэх</span>
+    </button>
+    <button class="cta-sec">
+      <span id="cta2">Демо үзэх →</span>
+    </button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n">1,284+</div><div class="stat-l" id="sl1">Харилцагч</div></div>
+    <div class="stat"><div class="stat-n">99.9%</div><div class="stat-l" id="sl2">Uptime</div></div>
+    <div class="stat"><div class="stat-n">24/7</div><div class="stat-l" id="sl3">AI дэмжлэг</div></div>
+    <div class="stat"><div class="stat-n">4 сек</div><div class="stat-l" id="sl4">Хариу хугацаа</div></div>
+    <div class="stat"><div class="stat-n">40%</div><div class="stat-l" id="sl5">Зардал хэмнэлт</div></div>
+  </div>
+
+  <div class="scroll-ind">
+    <span class="scroll-txt">scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Домэйн</span> Хайлт & Захиалга</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">AI Чатбот</span> Монгол хэлтэй</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">CRM Pipeline</span> Борлуулалт</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Call Center</span> 24/7 дэмжлэг</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">QPay & SocialPay</span> Интеграц</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Вэбсайт Builder</span> 10 минутад</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">eSeller</span> Автомат захиалга</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">И-мэйл</span> Маркетинг</span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Домэйн</span> Хайлт & Захиалга</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">AI Чатбот</span> Монгол хэлтэй</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">CRM Pipeline</span> Борлуулалт</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Call Center</span> 24/7 дэмжлэг</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">QPay & SocialPay</span> Интеграц</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">Вэбсайт Builder</span> 10 минутад</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">eSeller</span> Автомат захиалга</span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span class="marquee-hi">И-мэйл</span> Маркетинг</span>
+  </div>
+</div>
+
+<!-- ═══ SERVICES ═══ -->
+<section class="services reveal" id="svc">
+  <div class="section-eyebrow">Үйлчилгээ</div>
+  <h2 class="section-h2" id="svch">Нэг платформ.<br/>Бүх зүйл.</h2>
+  <p class="section-sub" id="svcs">Өрсөлдөгчдийнх шиг 3 өөр компанид төлж, 3 өөр хаяг санах хэрэггүй.</p>
+
+  <div class="svc-grid">
+    <div class="svc-card" style="--svc-glow:#7B6FFF40;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#7B6FFF18;border-color:#7B6FFF25;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#7B6FFF" stroke-width="1.3"/><ellipse cx="8" cy="8" rx="2.5" ry="5.5" stroke="#7B6FFF" stroke-width="1.1"/><line x1="2.5" y1="8" x2="13.5" y2="8" stroke="#7B6FFF" stroke-width="1.1"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">Домэйн & Хост</div>
+      <div class="svc-desc">.mn .com .org хаягаа хайж олоод минутын дотор идэвхжүүл</div>
+      <div class="svc-tag" style="background:#7B6FFF12;color:#9F98FF;">.mn ₮165,000/жил</div>
+    </div>
+    <div class="svc-card" style="--svc-glow:#00E5B840;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#00E5B815;border-color:#00E5B825;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="8" rx="1.5" stroke="#00E5B8" stroke-width="1.3"/><line x1="5" y1="13" x2="11" y2="13" stroke="#00E5B8" stroke-width="1.5"/><line x1="8" y1="11" x2="8" y2="13" stroke="#00E5B8" stroke-width="1.3"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">Вэбсайт Builder</div>
+      <div class="svc-desc">Drag & drop загварчлал. 10 минутад бэлэн болох мэргэжлийн сайт</div>
+      <div class="svc-tag" style="background:#00E5B812;color:#00E5B8;">Загвар 50+</div>
+    </div>
+    <div class="svc-card" style="--svc-glow:#FFB02E40;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#FFB02E18;border-color:#FFB02E25;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M3 11L2 14L5.5 12.5C6.2 13.1 7 13.5 8 13.5C11.1 13.5 13.5 11.4 13.5 8.8C13.5 6.2 11.1 4 8 4C4.9 4 2.5 6.2 2.5 8.8C2.5 9.6 2.7 10.4 3 11Z" stroke="#FFB02E" stroke-width="1.3"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">AI Чатбот</div>
+      <div class="svc-desc">Монгол хэлтэй AI. Facebook, вэбсайт, Viber-д зэрэг ажилладаг</div>
+      <div class="svc-tag" style="background:#FFB02E12;color:#FFB02E;">94% автомат</div>
+    </div>
+    <div class="svc-card" style="--svc-glow:#FF6B9D40;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#FF6B9D18;border-color:#FF6B9D25;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="5" r="2.5" stroke="#FF6B9D" stroke-width="1.3"/><path d="M1.5 13C1.5 10.8 3.3 9 5.5 9" stroke="#FF6B9D" stroke-width="1.3"/><path d="M11 8L13 10L15 7" stroke="#FF6B9D" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">CRM Pipeline</div>
+      <div class="svc-desc">Харилцагчийн мэдээлэл, борлуулалтын дарааллыг нэг дороос хянах</div>
+      <div class="svc-tag" style="background:#FF6B9D12;color:#FF6B9D;">Kanban + List</div>
+    </div>
+    <div class="svc-card" style="--svc-glow:#9F98FF40;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#9F98FF18;border-color:#9F98FF25;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M4 2.5C4 2.5 2.5 4 2.5 6.5C2.5 10.5 5.5 13.5 9.5 13.5C12 13.5 13.5 12 13.5 12L11.5 10L9.5 11.5C9.5 11.5 7 9.5 4.5 6.5L6 4.5Z" stroke="#9F98FF" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">Call Center</div>
+      <div class="svc-desc">Callpro AI технологитой. Хоногийн 24 цаг автомат хариулт</div>
+      <div class="svc-tag" style="background:#9F98FF12;color:#9F98FF;">24/7 · AI</div>
+    </div>
+    <div class="svc-card" style="--svc-glow:#00E5B840;" onclick="goDash()">
+      <div class="svc-icon-wrap" style="background:#00E5B815;border-color:#00E5B825;">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="12" r="1.2" fill="#00E5B8"/><circle cx="12" cy="12" r="1.2" fill="#00E5B8"/><path d="M2 3L4 3L5.5 9L12.5 9L14 5L5 5" stroke="#00E5B8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <svg class="svc-arrow" viewBox="0 0 16 16" fill="none"><path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="svc-name">eSeller</div>
+      <div class="svc-desc">QPay & SocialPay интегратэй. Захиалга хүлээн авч автомат идэвхжүүл</div>
+      <div class="svc-tag" style="background:#00E5B812;color:#00E5B8;">98.7% автомат</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DOMAIN SEARCH ═══ -->
+<section class="domain-sec reveal" id="domain">
+  <div class="search-wrap">
+    <div class="search-glow"></div>
+    <div class="section-eyebrow" style="justify-content:flex-start;">Домэйн</div>
+    <div class="search-h" id="sh">Бизнесийн нэрээ<br/>онлайнд гаргаарай</div>
+    <div class="search-s" id="ss">Таны брэнд. Таны домэйн. Минутын дотор.</div>
+    <div class="search-box">
+      <input class="search-input" id="srch" placeholder="жишээ: miniibiznес.mn" onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="search-btn" onclick="doSearch()" id="sbtn">Хайх</button>
+    </div>
+    <div class="tld-row">
+      <div class="tld-pill"><b>.mn</b> ₮165,000</div>
+      <div class="tld-pill"><b>.com</b> ₮62,500</div>
+      <div class="tld-pill"><b>.org</b> ₮75,000</div>
+      <div class="tld-pill"><b>.net</b> ₮94,600</div>
+      <div class="tld-pill"><b>.shop</b> ₮88,000</div>
+    </div>
+    <div class="search-results" id="sres"></div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="pricing reveal" id="price">
+  <div class="section-eyebrow">Үнэ</div>
+  <h2 class="section-h2" id="ph">Шударга. Нэг үнэ.<br/>Нуугдмал зардал үгүй.</h2>
+  <p class="section-sub" id="ps">Хэдийд ч цуцалж болно. Кредит карт шаардлагагүй.</p>
+
+  <div class="price-grid">
+    <div class="pc">
+      <div class="pc-name">Starter</div>
+      <div class="pc-price">₮99,000<span>/сар</span></div>
+      <div class="pc-desc">Эхлэгч бизнест тохирсон</div>
+      <div class="pc-div"></div>
+      <div class="pc-features">
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>1 домэйн + хост</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>Бэлэн загварт вэбсайт</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>SSL + 5 имэйл хаяг</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>Дэмжлэг 9–18 цаг</div>
+      </div>
+      <button class="pc-btn pc-btn-o" onclick="goDash()">Эхлэх</button>
+    </div>
+
+    <div class="pc feat">
+      <div class="pc-eyebrow">Хамгийн их сонгогддог</div>
+      <div class="pc-name">Business</div>
+      <div class="pc-price">₮249,000<span>/сар</span></div>
+      <div class="pc-desc">Өсөн дэвших бизнест</div>
+      <div class="pc-div"></div>
+      <div class="pc-features">
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>5 домэйн + cloud хост</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>CRM + имэйл маркетинг</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>AI чатбот Facebook + вэб</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>QPay / SocialPay</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>AI дэмжлэг 24/7</div>
+      </div>
+      <button class="pc-btn pc-btn-v" onclick="goDash()">Одоо эхлэх</button>
+    </div>
+
+    <div class="pc">
+      <div class="pc-name">Enterprise</div>
+      <div class="pc-price" style="font-size:22px;letter-spacing:-.5px;margin-top:6px;">Тохиролцоно</div>
+      <div class="pc-desc">Том байгууллагад</div>
+      <div class="pc-div"></div>
+      <div class="pc-features">
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>Хязгааргүй домэйн & хост</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>ERP / Odoo нэвтрүүлэлт</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>Call center + Callpro</div>
+        <div class="pc-feat-item"><div class="chk"><svg width="9" height="9" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" fill="none" stroke="#00E5B8" stroke-width="1.5"/></svg></div>Dedicated manager</div>
+      </div>
+      <button class="pc-btn pc-btn-o" onclick="goDash()">Холбоо барих</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="testi reveal" id="testi">
+  <div class="section-eyebrow">Харилцагчид</div>
+  <h2 class="section-h2" style="margin-bottom:40px;" id="th">Тэд Nuul-ийг ашиглаж байна</h2>
+  <div class="testi-grid">
+    <div class="tc">
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <div class="tc-quote">"</div>
+      <p class="tc-text">10 минутад вэбсайтаа бэлэн болголоо. Домэйноосоо чатбот хүртэл нэг дороос шийдсэн нь маш хялбар байлаа. Өмнө нь ингэж хялбар байх юм гэж бодоогүй.</p>
+      <div class="tc-author">
+        <div class="tc-av" style="background:#7B6FFF22;color:#A89FFF;border-color:#7B6FFF30;">Б</div>
+        <div><div class="tc-name">Батбаяр Д.</div><div class="tc-role">Кофе шоп эзэн</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <div class="tc-quote">"</div>
+      <p class="tc-text">Өмнө нь 3 компанид төлж байсан. Nuul нэг төлбөрт бүгдийг оруулж өгсөн. Сарын зардал 40% буурсан. Хамгийн сайн шийдвэрүүдийн нэг болсон.</p>
+      <div class="tc-author">
+        <div class="tc-av" style="background:#00E5B815;color:#00E5B8;border-color:#00E5B825;">Н</div>
+        <div><div class="tc-name">Номин Г.</div><div class="tc-role">Онлайн дэлгүүр</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="stars"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div>
+      <div class="tc-quote">"</div>
+      <p class="tc-text">AI чатбот маань 24/7 хариулж байна. Ажилтангүйгээр хоногт 50+ хэрэглэгчтэй харилцдаг болсон. Orлого 30% өссөн.</p>
+      <div class="tc-author">
+        <div class="tc-av" style="background:#FFB02E18;color:#FFB02E;border-color:#FFB02E25;">Э</div>
+        <div><div class="tc-name">Энхбаяр С.</div><div class="tc-role">Маркетинг агентлаг</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section reveal">
+  <div class="cta-inner">
+    <div class="cta-glow1"></div>
+    <div class="cta-glow2"></div>
+    <h2 class="cta-h"><span id="ctah1">Өнөөдрөөс</span><br/><span id="ctah2">эхэлцгээе</span></h2>
+    <p class="cta-sub" id="ctasub">Бүртгүүлэхэд 2 минут. Кредит карт шаардлагагүй.<br/>Эхний 14 хоног бүрэн үнэгүй.</p>
+    <div class="cta-btns">
+      <button class="cta-main" onclick="goDash()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8L8 14M14 8H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="ctabtn">Үнэгүй эхлэх</span>
+      </button>
+      <button class="cta-sec" onclick="goDash()"><span id="ctabtn2">Холбоо барих</span></button>
+    </div>
+    <div class="cta-badge">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2L9.8 5.6L14 6.3L11 9.2L11.6 13.5L8 11.5L4.4 13.5L5 9.2L2 6.3L6.2 5.6Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span id="ctanote">Нуугдмал төлбөр байхгүй · Хэдийд ч цуцалж болно</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">
+    <div class="logo-mark" style="width:28px;height:28px;border-radius:8px;">
+      <svg width="13" height="13" viewBox="0 0 18 18" fill="none"><path d="M9 2L16 14H2Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45"/><circle cx="9" cy="9" r="1.6" fill="#fff"/></svg>
+    </div>
+    <span class="logo-word" style="font-size:15px;">nuul<span>.mn</span></span>
+  </div>
+  <div class="foot-links">
+    <span class="foot-link">Нөхцөл</span>
+    <span class="foot-link">Нууцлал</span>
+    <span class="foot-link">Блог</span>
+    <span class="foot-link">Холбоо барих</span>
+  </div>
+  <span class="foot-cr">© 2025 Nuul Digital LLC</span>
+</footer>
+
+<script>
+// ── Custom cursor ──
+var cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+var mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;cur.style.left=(mx-4)+'px';cur.style.top=(my-4)+'px';});
+setInterval(function(){cx+=(mx-cx)*.12;cy+=(my-cy)*.12;cur2.style.left=(cx-14)+'px';cur2.style.top=(cy-14)+'px';},16);
+document.querySelectorAll('button,a,.svc-card,.tc,.pc,.tld-pill,.nav-link').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.style.transform='scale(2.5)';cur.style.background='var(--t)';cur2.style.transform='scale(1.5)';});
+  el.addEventListener('mouseleave',function(){cur.style.transform='scale(1)';cur.style.background='var(--v)';cur2.style.transform='scale(1)';});
+});
+
+// ── Lang toggle ──
+var mn=true;
+var L={
+  hbadge:["Монголын анхны AI-powered платформ","Mongolia's first AI-powered platform"],
+  hl1:["Таны бизнесийн","Your business"],
+  hl2:["дижитал үүл","digital cloud"],
+  hl3:["Домэйн · Хост · Вэб · CRM · AI","Domain · Hosting · Web · CRM · AI"],
+  hsub:["Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ.<br/>Бүгдийг нэг дороос. Автомат. Хялбар. 24/7.","A complete digital platform built for Mongolian businesses.<br/>Everything in one place. Automated. Simple. 24/7."],
+  cta1:["Үнэгүй эхлэх","Start free"],cta2:["Демо үзэх →","View demo →"],
+  sl1:["Харилцагч","Clients"],sl2:["Uptime","Uptime"],sl3:["AI дэмжлэг","AI support"],sl4:["Хариу хугацаа","Response time"],sl5:["Зардал хэмнэлт","Cost savings"],
+  svch:["Нэг платформ.<br/>Бүх зүйл.","One platform.<br/>Everything."],
+  svcs:["Өрсөлдөгчдийнх шиг 3 өөр компанид төлж, 3 өөр хаяг санах хэрэггүй.","No more paying 3 separate companies or remembering 3 different logins."],
+  sh:["Бизнесийн нэрээ<br/>онлайнд гаргаарай","Take your business<br/>name online"],
+  ss:["Таны брэнд. Таны домэйн. Минутын дотор.","Your brand. Your domain. In minutes."],
+  sbtn:["Хайх","Search"],
+  ph:["Шударга. Нэг үнэ.<br/>Нуугдмал зардал үгүй.","Fair. One price.<br/>No hidden costs."],
+  ps:["Хэдийд ч цуцалж болно. Кредит карт шаардлагагүй.","Cancel anytime. No credit card required."],
+  th:["Тэд Nuul-ийг ашиглаж байна","They use Nuul"],
+  ctah1:["Өнөөдрөөс","Start"],ctah2:["эхэлцгээе","today"],
+  ctasub:["Бүртгүүлэхэд 2 минут. Кредит карт шаардлагагүй.<br/>Эхний 14 хоног бүрэн үнэгүй.","2 minutes to sign up. No credit card needed.<br/>First 14 days completely free."],
+  ctabtn:["Үнэгүй эхлэх","Start free"],ctabtn2:["Холбоо барих","Contact us"],
+  ctanote:["Нуугдмал төлбөр байхгүй · Хэдийд ч цуцалж болно","No hidden fees · Cancel anytime"],
+};
+function t(k){return(L[k]||['',''])[mn?0:1];}
+function toggleLang(){
+  mn=!mn;
+  document.getElementById('lb').textContent=mn?'EN':'МН';
+  Object.keys(L).forEach(function(k){var el=document.getElementById(k);if(el)el.innerHTML=t(k);});
+}
+
+// ── Domain search ──
+var tlds=['.mn','.com','.org','.net','.shop'];
+var prices={'.mn':'₮165,000','.com':'₮62,500','.org':'₮75,000','.net':'₮94,600','.shop':'₮88,000'};
+function doSearch(){
+  var val=document.getElementById('srch').value.trim();
+  if(!val)return;
+  var base=val.includes('.')?val.replace(/\.[^.]+$/,''):val;
+  var res=document.getElementById('sres');
+  res.innerHTML='';res.style.display='block';
+  tlds.forEach(function(ext){
+    var av=Math.random()>.35;
+    var d=document.createElement('div');d.className='dr';
+    d.innerHTML='<span class="dr-domain">'+base+ext+'</span>'
+      +'<span class="'+(av?'dr-available':'dr-taken')+'">'+(av?'✓ Боломжтой':'✗ Авагдсан')+'</span>'
+      +'<span class="dr-price">'+prices[ext]+'</span>'
+      +(av?'<button class="btn-order" onclick="this.textContent=\'✓ Сагсанд\';this.style.background=\'var(--t)\';this.style.color=\'#000\';">Захиалах</button>':'<span class="btn-taken">—</span>');
+    res.appendChild(d);
+  });
+}
+
+// ── Reveal on scroll ──
+var revEls=document.querySelectorAll('.reveal,.reveal-l');
+function checkReveal(){
+  revEls.forEach(function(el){
+    var rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight-80)el.classList.add('in');
+  });
+}
+window.addEventListener('scroll',checkReveal,{passive:true});
+checkReveal();
+
+// ── Nav bg on scroll ──
+var nav=document.querySelector('nav');
+window.addEventListener('scroll',function(){
+  if(window.scrollY>60){nav.style.backdropFilter='blur(16px)';nav.style.background='#03030ACC';}
+  else{nav.style.backdropFilter='blur(0px)';nav.style.background='transparent';}
+},{passive:true});
+
+// ── Go to dashboard ──
+function goDash(){
+  // inject and load the full app
+  window.open('nuul-app.html','_self');
+}
+</script>
+</body>
+</html>
