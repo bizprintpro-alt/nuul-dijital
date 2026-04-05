@@ -64,8 +64,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, user }, { status: 201 });
   } catch (error) {
     console.error("[REGISTER_ERROR]", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Серверийн алдаа. Дахин оролдоно уу." },
+      { error: "Серверийн алдаа. Дахин оролдоно уу.", debug: message },
       { status: 500 },
     );
   }
