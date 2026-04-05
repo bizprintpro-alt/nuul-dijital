@@ -1,56 +1,40 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, publicProcedure, protectedProcedure, prisma } from "@/lib/trpc";
-
-const DOMAIN_PRICES: Record<string, number> = {
-  ".mn": 165000,
-  ".com": 62500,
-  ".org": 75000,
-  ".net": 94600,
-  ".shop": 88000,
-};
-
-const TLDS = [".mn", ".com", ".org", ".net", ".shop"] as const;
+import { checkDomainAvailability, DOMAIN_PRICES } from "@/lib/domain-checker";
 
 export const domainRouter = router({
   search: publicProcedure
-    .input(z.object({ query: z.string().min(1).max(63) }))
+    .input(z.object({ query: z.string().min(2).max(63) }))
     .query(async ({ input }) => {
-      const base = input.query
+      const clean = input.query
         .trim()
         .toLowerCase()
         .replace(/[^a-z0-9-]/g, "")
         .replace(/\.[^.]+$/, "");
 
-      if (!base) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid domain name",
-        });
+      if (!clean) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Домэйн нэр буруу байна" });
       }
 
-      const domainNames = TLDS.map((tld) => `${base}${tld}`);
+      // Real RDAP availability check
+      const results = await checkDomainAvailability(clean);
 
-      const existingDomains = await prisma.domain.findMany({
-        where: { name: { in: domainNames } },
-        select: { name: true, status: true },
+      // Also check our DB for domains we've registered
+      const ourDomains = await prisma.domain.findMany({
+        where: { name: { in: results.map((r) => r.domain) } },
+        select: { name: true },
       });
+      const ourSet = new Set(ourDomains.map((d) => d.name));
 
-      const registeredSet = new Set(existingDomains.map((d) => d.name));
-
-      return TLDS.map((tld) => {
-        const fullDomain = `${base}${tld}`;
-        return {
-          domain: fullDomain,
-          tld,
-          price: DOMAIN_PRICES[tld],
-          available: !registeredSet.has(fullDomain),
-        };
-      });
+      return results.map((r) => ({
+        ...r,
+        available: r.available && !ourSet.has(r.domain),
+      }));
     }),
 
   getUserDomains: protectedProcedure.query(async ({ ctx }) => {
-    const domains = await prisma.domain.findMany({
+    return prisma.domain.findMany({
       where: { userId: ctx.session.user.id },
       select: {
         id: true,
@@ -63,14 +47,12 @@ export const domainRouter = router({
       },
       orderBy: { createdAt: "desc" },
     });
-
-    return domains;
   }),
 
   orderDomain: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(1).max(63),
+        name: z.string().min(2).max(63),
         tld: z.enum([".mn", ".com", ".org", ".net", ".shop"]),
         years: z.number().int().min(1).max(10).default(1),
       })
@@ -80,21 +62,20 @@ export const domainRouter = router({
       const price = DOMAIN_PRICES[input.tld];
 
       if (!price) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Unsupported TLD",
-        });
+        throw new TRPCError({ code: "BAD_REQUEST", message: "TLD дэмжигдэхгүй" });
       }
 
-      const existing = await prisma.domain.findUnique({
-        where: { name: fullDomain },
-      });
-
+      // Check if already registered in our DB
+      const existing = await prisma.domain.findUnique({ where: { name: fullDomain } });
       if (existing) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Domain is already registered",
-        });
+        throw new TRPCError({ code: "CONFLICT", message: "Домэйн бүртгэлтэй байна" });
+      }
+
+      // Double-check availability via RDAP
+      const results = await checkDomainAvailability(input.name);
+      const check = results.find((r) => r.tld === input.tld);
+      if (check && !check.available) {
+        throw new TRPCError({ code: "CONFLICT", message: "Домэйн аль хэдийн авагдсан" });
       }
 
       const totalAmount = price * input.years;
@@ -120,7 +101,7 @@ export const domainRouter = router({
           },
         });
 
-        return { orderId: order.id, domain: domain.name };
+        return { orderId: order.id, domain: domain.name, amount: totalAmount };
       });
 
       return result;
@@ -129,44 +110,24 @@ export const domainRouter = router({
   renewDomain: protectedProcedure
     .input(z.object({ domainId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const domain = await prisma.domain.findUnique({
-        where: { id: input.domainId },
-      });
+      const domain = await prisma.domain.findUnique({ where: { id: input.domainId } });
 
-      if (!domain) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Domain not found" });
-      }
-
-      if (domain.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not own this domain",
-        });
+      if (!domain || domain.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Домэйн олдсонгүй" });
       }
 
       const price = DOMAIN_PRICES[domain.tld] ?? domain.price;
-      const currentExpiry = domain.expiresAt ?? new Date();
-      const newExpiry = new Date(currentExpiry);
-      newExpiry.setFullYear(newExpiry.getFullYear() + 1);
 
-      const result = await prisma.$transaction(async (tx) => {
-        await tx.domain.update({
-          where: { id: domain.id },
-          data: { expiresAt: newExpiry },
-        });
-
-        const order = await tx.order.create({
-          data: {
-            userId: ctx.session.user.id,
-            type: "DOMAIN",
-            amount: price,
-            status: "PENDING",
-          },
-        });
-
-        return { orderId: order.id, domain: domain.name, newExpiresAt: newExpiry };
+      const order = await prisma.order.create({
+        data: {
+          userId: ctx.session.user.id,
+          domainId: domain.id,
+          type: "DOMAIN",
+          amount: price,
+          status: "PENDING",
+        },
       });
 
-      return result;
+      return { orderId: order.id, domain: domain.name, amount: price };
     }),
 });

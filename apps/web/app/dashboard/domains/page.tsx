@@ -2,220 +2,224 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc-client";
-import { Globe, Search, AlertTriangle, ShoppingCart, Loader2 } from "lucide-react";
+import { Globe, AlertTriangle, Loader2, RefreshCw, Search, List } from "lucide-react";
+import { DomainSearch } from "@/components/domains/DomainSearch";
+import { QPayModal } from "@/components/payments/QPayModal";
 
-function SkeletonRow() {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-white/[0.03] bg-white/[0.01] px-5 py-3">
-      <div className="flex items-center gap-3">
-        <div className="h-4 w-4 animate-pulse rounded bg-bg-3" />
-        <div className="h-3 w-32 animate-pulse rounded bg-bg-3" />
-      </div>
-      <div className="h-4 w-16 animate-pulse rounded bg-bg-3" />
-      <div className="h-3 w-24 animate-pulse rounded bg-bg-3" />
-    </div>
-  );
+interface QPayState {
+  invoiceId: string;
+  qrImage: string;
+  shortUrl?: string;
+  deeplinks?: Array<{ name: string; description: string; logo: string; link: string }>;
+  amount: number;
 }
 
 export default function DomainsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [orderingDomain, setOrderingDomain] = useState<string | null>(null);
-
-  const searchResults = trpc.domain.search.useQuery(
-    { query: searchQuery },
-    { enabled: searchQuery.length > 0 }
-  );
+  const [tab, setTab] = useState<"search" | "my">("search");
+  const [renewing, setRenewing] = useState<string | null>(null);
+  const [qpay, setQpay] = useState<QPayState | null>(null);
 
   const userDomains = trpc.domain.getUserDomains.useQuery();
+  const renewDomain = trpc.domain.renewDomain.useMutation();
 
-  const orderDomain = trpc.domain.orderDomain.useMutation({
-    onSuccess: () => {
-      setOrderingDomain(null);
-      userDomains.refetch();
-    },
-    onError: () => {
-      setOrderingDomain(null);
-    },
-  });
-
-  function handleOrder(domain: string, tld: string) {
-    const name = domain.replace(tld, "");
-    setOrderingDomain(domain);
-    orderDomain.mutate({ name, tld: tld as ".mn" | ".com" | ".org" | ".net" | ".shop" });
-  }
-
-  function getDaysUntilExpiry(expiresAt: string | Date | null): number | null {
+  function getDaysLeft(expiresAt: string | Date | null): number | null {
     if (!expiresAt) return null;
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry.getTime() - now.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000);
   }
+
+  function getExpiryColor(days: number | null): string {
+    if (days === null) return "text-txt-3";
+    if (days <= 0) return "text-red-400";
+    if (days <= 30) return "text-red-400";
+    if (days <= 90) return "text-[#FFB02E]";
+    return "text-t";
+  }
+
+  async function handleRenew(domainId: string) {
+    setRenewing(domainId);
+    try {
+      const result = await renewDomain.mutateAsync({ domainId });
+
+      const res = await fetch("/api/payments/qpay/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: result.orderId,
+          amount: result.amount,
+          description: `${result.domain} домэйн сунгалт`,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setQpay({
+          invoiceId: data.invoiceId,
+          qrImage: data.qrImage,
+          shortUrl: data.shortUrl,
+          deeplinks: data.deeplinks,
+          amount: result.amount,
+        });
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Алдаа гарлаа");
+    } finally {
+      setRenewing(null);
+    }
+  }
+
+  const statusLabel: Record<string, { text: string; color: string }> = {
+    ACTIVE: { text: "Идэвхтэй", color: "bg-t/15 text-t" },
+    PENDING: { text: "Хүлээгдэж буй", color: "bg-[#FFB02E]/15 text-[#FFB02E]" },
+    EXPIRED: { text: "Хугацаа дууссан", color: "bg-red-500/15 text-red-400" },
+    TRANSFERRING: { text: "Шилжүүлж буй", color: "bg-v/15 text-v-soft" },
+  };
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="font-syne text-2xl font-bold tracking-tight text-txt">
-          Домэйн захиалах
-        </h1>
-        <p className="mt-1 text-[13px] text-txt-3">
-          Бизнесийн нэрээ онлайнд бүртгүүлээрэй
-        </p>
+        <h1 className="font-syne text-2xl font-bold tracking-tight text-txt">Домэйн</h1>
+        <p className="mt-1 text-[13px] text-txt-3">Домэйн хайж, захиалж, удирдах</p>
       </div>
 
-      {/* Search */}
-      <div className="rounded-2xl border border-white/[0.04] bg-bg-2 p-6">
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-3"
-          />
-          <input
-            type="text"
-            placeholder="Домэйн нэр хайх... (жнь: miniishop)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-white/[0.06] bg-bg px-4 py-3 pl-11 text-[13px] text-txt placeholder:text-txt-3 focus:border-v/30 focus:outline-none focus:ring-1 focus:ring-v/20"
-          />
-        </div>
-
-        {/* Search results */}
-        {searchQuery.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {searchResults.isLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 size={20} className="animate-spin text-v" />
-                <span className="ml-2 text-[13px] text-txt-3">Хайж байна...</span>
-              </div>
-            ) : searchResults.isError ? (
-              <p className="py-4 text-center text-[13px] text-red-400">
-                Хайлтанд алдаа гарлаа
-              </p>
-            ) : searchResults.data?.length === 0 ? (
-              <p className="py-4 text-center text-[13px] text-txt-3">
-                Үр дүн олдсонгүй
-              </p>
-            ) : (
-              searchResults.data?.map((result) => (
-                <div
-                  key={result.domain}
-                  className="flex items-center justify-between rounded-xl border border-white/[0.03] bg-white/[0.01] px-5 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <Globe size={16} className={result.available ? "text-t" : "text-txt-3"} />
-                    <span className="text-[13px] font-medium text-txt">
-                      {result.domain}
-                    </span>
-                  </div>
-                  <span className="text-[13px] font-semibold text-txt">
-                    ₮{result.price.toLocaleString()}
-                  </span>
-                  {result.available ? (
-                    <button
-                      onClick={() => handleOrder(result.domain, result.tld)}
-                      disabled={orderingDomain === result.domain}
-                      className="flex items-center gap-1.5 rounded-lg bg-v px-3 py-1.5 text-[11px] font-bold text-white transition-all hover:bg-v/80 disabled:opacity-50"
-                    >
-                      {orderingDomain === result.domain ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <ShoppingCart size={12} />
-                      )}
-                      Захиалах
-                    </button>
-                  ) : (
-                    <span className="rounded-md bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-400">
-                      Бүртгэлтэй
-                    </span>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {orderDomain.isError && (
-          <p className="mt-3 text-[13px] text-red-400">
-            Захиалга үүсгэхэд алдаа гарлаа: {orderDomain.error.message}
-          </p>
-        )}
-        {orderDomain.isSuccess && (
-          <p className="mt-3 text-[13px] text-t">
-            Захиалга амжилттай үүслээ! Домэйн: {orderDomain.data.domain}
-          </p>
-        )}
-      </div>
-
-      {/* My Domains */}
-      <div className="mt-6 rounded-2xl border border-white/[0.04] bg-bg-2 p-6">
-        <h3 className="mb-4 font-syne text-base font-bold text-txt">
+      {/* Tabs */}
+      <div className="mb-6 flex gap-1 rounded-xl bg-bg-2 p-1 border border-white/[0.04]">
+        <button
+          onClick={() => setTab("search")}
+          className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-medium transition ${
+            tab === "search" ? "bg-v/15 text-v-soft" : "text-txt-3 hover:text-txt-2"
+          }`}
+        >
+          <Search size={15} />
+          Домэйн хайх
+        </button>
+        <button
+          onClick={() => setTab("my")}
+          className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-medium transition ${
+            tab === "my" ? "bg-v/15 text-v-soft" : "text-txt-3 hover:text-txt-2"
+          }`}
+        >
+          <List size={15} />
           Миний домэйнууд
-        </h3>
-        {userDomains.isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </div>
-        ) : userDomains.isError ? (
-          <p className="text-[13px] text-red-400">Ачааллахад алдаа гарлаа</p>
-        ) : !userDomains.data || userDomains.data.length === 0 ? (
-          <p className="text-[13px] text-txt-3">Домэйн байхгүй байна</p>
-        ) : (
-          <div className="space-y-2">
-            {userDomains.data.map((d) => {
-              const daysLeft = getDaysUntilExpiry(d.expiresAt);
-              const isExpiringSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 30;
-              const isExpired = daysLeft !== null && daysLeft <= 0;
-
-              return (
-                <div
-                  key={d.id}
-                  className="flex items-center justify-between rounded-xl border border-white/[0.03] bg-white/[0.01] px-5 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <Globe size={16} className="text-v" />
-                    <span className="text-[13px] font-medium text-txt">
-                      {d.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {(isExpiringSoon || isExpired) && (
-                      <div className="flex items-center gap-1 text-[11px] text-[#FFB02E]">
-                        <AlertTriangle size={12} />
-                        {isExpired
-                          ? "Хугацаа дууссан"
-                          : `${daysLeft} хоног үлдсэн`}
-                      </div>
-                    )}
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                        d.status === "ACTIVE"
-                          ? "bg-t/15 text-t"
-                          : d.status === "PENDING"
-                            ? "bg-[#FFB02E]/15 text-[#FFB02E]"
-                            : "bg-red-500/15 text-red-400"
-                      }`}
-                    >
-                      {d.status === "ACTIVE"
-                        ? "Идэвхтэй"
-                        : d.status === "PENDING"
-                          ? "Хүлээгдэж буй"
-                          : d.status}
-                    </span>
-                    <span className="text-[12px] text-txt-3">
-                      Дуусах:{" "}
-                      {d.expiresAt
-                        ? new Date(d.expiresAt).toLocaleDateString("mn-MN")
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+          {userDomains.data && userDomains.data.length > 0 && (
+            <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">{userDomains.data.length}</span>
+          )}
+        </button>
       </div>
+
+      {/* Search tab */}
+      {tab === "search" && (
+        <div className="rounded-2xl border border-white/[0.04] bg-bg-2 p-6">
+          <DomainSearch />
+        </div>
+      )}
+
+      {/* My Domains tab */}
+      {tab === "my" && (
+        <div className="rounded-2xl border border-white/[0.04] bg-bg-2 p-6">
+          <h3 className="mb-4 font-syne text-base font-bold text-txt">Миний домэйнууд</h3>
+
+          {userDomains.isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-14 animate-pulse rounded-xl bg-bg-3" />
+              ))}
+            </div>
+          ) : !userDomains.data || userDomains.data.length === 0 ? (
+            <div className="py-12 text-center">
+              <Globe size={32} className="mx-auto mb-3 text-txt-3" />
+              <p className="text-[13px] text-txt-3">Домэйн байхгүй байна</p>
+              <button
+                onClick={() => setTab("search")}
+                className="mt-3 rounded-lg bg-v px-4 py-2 text-[12px] font-bold text-white"
+              >
+                Домэйн хайх
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/[0.04] text-left text-[11px] font-semibold uppercase tracking-wider text-txt-3">
+                    <th className="pb-3 pr-4">Домэйн</th>
+                    <th className="pb-3 pr-4">Төлөв</th>
+                    <th className="pb-3 pr-4">Дуусах огноо</th>
+                    <th className="pb-3">Үйлдэл</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userDomains.data.map((d) => {
+                    const daysLeft = getDaysLeft(d.expiresAt);
+                    const expiryColor = getExpiryColor(daysLeft);
+                    const st = statusLabel[d.status] ?? { text: d.status, color: "bg-white/[0.06] text-txt-3" };
+
+                    return (
+                      <tr key={d.id} className="border-b border-white/[0.02]">
+                        <td className="py-3.5 pr-4">
+                          <div className="flex items-center gap-2">
+                            <Globe size={15} className="text-v" />
+                            <span className="text-[13px] font-medium text-txt">{d.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${st.color}`}>{st.text}</span>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          {d.expiresAt ? (
+                            <div className="flex items-center gap-1.5">
+                              {daysLeft !== null && daysLeft <= 30 && (
+                                <AlertTriangle size={12} className="text-red-400" />
+                              )}
+                              <span className={`text-[12px] font-medium ${expiryColor}`}>
+                                {new Date(d.expiresAt).toLocaleDateString("mn-MN")}
+                                {daysLeft !== null && (
+                                  <span className="ml-1 text-[11px]">
+                                    ({daysLeft <= 0 ? "Дууссан" : `${daysLeft} хоног`})
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[12px] text-txt-3">—</span>
+                          )}
+                        </td>
+                        <td className="py-3.5">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleRenew(d.id)}
+                              disabled={renewing === d.id}
+                              className="flex items-center gap-1 rounded-lg bg-v/10 px-3 py-1.5 text-[11px] font-bold text-v-soft transition hover:bg-v/20 disabled:opacity-50"
+                            >
+                              {renewing === d.id ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                              Сунгах
+                            </button>
+                            <button className="rounded-lg border border-white/[0.06] px-3 py-1.5 text-[11px] text-txt-3 transition hover:bg-white/[0.03]">
+                              DNS
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* QPay Modal for renewal */}
+      {qpay && (
+        <QPayModal
+          open={true}
+          onClose={() => setQpay(null)}
+          onSuccess={() => { setQpay(null); userDomains.refetch(); }}
+          invoiceId={qpay.invoiceId}
+          qrImage={qpay.qrImage}
+          shortUrl={qpay.shortUrl}
+          deeplinks={qpay.deeplinks}
+          amount={qpay.amount}
+        />
+      )}
     </div>
   );
 }
