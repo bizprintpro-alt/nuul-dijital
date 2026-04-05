@@ -1,17 +1,16 @@
 /**
- * QPay Payment Integration for nuul.mn
- * Documentation: https://developer.qpay.mn
+ * QPay v2 Payment Integration for nuul.mn
  *
  * Env vars:
- *   QPAY_USERNAME       - QPay merchant username
- *   QPAY_PASSWORD       - QPay merchant password
- *   QPAY_INVOICE_CODE   - QPay invoice template code
- *   QPAY_ENV            - "production" | "sandbox" (default: sandbox)
+ *   QPAY_USERNAME       — merchant username
+ *   QPAY_PASSWORD       — merchant password
+ *   QPAY_INVOICE_CODE   — invoice template code
+ *   QPAY_ENV            — "production" | "sandbox" (default sandbox)
  */
 
-// ── Types ──────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────
 
-interface QPayAuthResponse {
+export interface QPayToken {
   token_type: string;
   refresh_expires_in: number;
   refresh_token: string;
@@ -19,19 +18,10 @@ interface QPayAuthResponse {
   expires_in: number;
 }
 
-interface QPayInvoiceRequest {
-  invoice_code: string;
-  sender_invoice_no: string;
-  invoice_receiver_code: string;
-  invoice_description: string;
-  amount: number;
-  callback_url: string;
-}
-
-export interface QPayInvoiceResponse {
+export interface QPayInvoice {
   invoice_id: string;
   qr_text: string;
-  qr_image: string;
+  qr_image: string; // base64
   qPay_shortUrl: string;
   urls: Array<{
     name: string;
@@ -41,51 +31,47 @@ export interface QPayInvoiceResponse {
   }>;
 }
 
-export interface QPayPaymentCheckResponse {
-  count: number;
-  paid_amount: number;
-  rows: Array<{
-    payment_id: string;
-    payment_status: string;
-    payment_amount: number;
-    payment_currency: string;
-    payment_wallet: string;
-    transaction_id: string;
-  }>;
+export interface QPayPaymentRow {
+  payment_id: string;
+  payment_status: string;
+  payment_amount: number;
+  payment_currency: string;
+  payment_wallet: string;
+  transaction_id: string;
 }
 
-// ── Base URL ───────────────────────────────────────────────────────
+export interface QPayCheckResponse {
+  count: number;
+  paid_amount: number;
+  rows: QPayPaymentRow[];
+}
 
-const QPAY_BASE_URL =
+// ── Config ────────────────────────────────────────────────────────────
+
+const QPAY_BASE =
   process.env.QPAY_ENV === "production"
     ? "https://merchant.qpay.mn/v2"
     : "https://merchant-sandbox.qpay.mn/v2";
 
-// ── Token cache ────────────────────────────────────────────────────
+// ── Token cache ───────────────────────────────────────────────────────
 
-let cachedToken: { token: string; expiresAt: number } | null = null;
+let tokenCache: { token: string; expiresAt: number } | null = null;
 
-/**
- * Authenticate with QPay using Basic auth (username:password).
- * Caches the token until 60s before expiry.
- */
 export async function getQPayToken(): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt) {
-    return cachedToken.token;
+  if (tokenCache && Date.now() < tokenCache.expiresAt) {
+    return tokenCache.token;
   }
 
   const username = process.env.QPAY_USERNAME;
   const password = process.env.QPAY_PASSWORD;
 
   if (!username || !password) {
-    throw new Error(
-      "QPay credentials not configured (QPAY_USERNAME / QPAY_PASSWORD)"
-    );
+    throw new Error("QPAY_USERNAME / QPAY_PASSWORD тохируулаагүй байна");
   }
 
   const credentials = Buffer.from(`${username}:${password}`).toString("base64");
 
-  const response = await fetch(`${QPAY_BASE_URL}/auth/token`, {
+  const res = await fetch(`${QPAY_BASE}/auth/token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,79 +79,66 @@ export async function getQPayToken(): Promise<string> {
     },
   });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `QPay auth failed: ${response.status} ${response.statusText} — ${text}`
-    );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`QPay auth алдаа: ${res.status} — ${text}`);
   }
 
-  const data: QPayAuthResponse = await response.json();
+  const data: QPayToken = await res.json();
 
-  cachedToken = {
+  tokenCache = {
     token: data.access_token,
-    // Expire 60 seconds early to avoid edge-case token expiry during requests
     expiresAt: Date.now() + data.expires_in * 1000 - 60_000,
   };
 
   return data.access_token;
 }
 
-/**
- * Create a QPay invoice.
- * Returns invoice_id, qr_text, qr_image, and bank deep-link urls.
- */
-export async function createQPayInvoice(params: {
+// ── Create Invoice ────────────────────────────────────────────────────
+
+export async function createInvoice(params: {
   orderId: string;
   amount: number;
   description: string;
   callbackUrl: string;
-}): Promise<QPayInvoiceResponse> {
+}): Promise<QPayInvoice> {
   const token = await getQPayToken();
-
   const invoiceCode = process.env.QPAY_INVOICE_CODE;
+
   if (!invoiceCode) {
-    throw new Error("QPAY_INVOICE_CODE is not configured");
+    throw new Error("QPAY_INVOICE_CODE тохируулаагүй байна");
   }
 
-  const body: QPayInvoiceRequest = {
-    invoice_code: invoiceCode,
-    sender_invoice_no: params.orderId,
-    invoice_receiver_code: "terminal",
-    invoice_description: params.description,
-    amount: params.amount,
-    callback_url: params.callbackUrl,
-  };
-
-  const response = await fetch(`${QPAY_BASE_URL}/invoice`, {
+  const res = await fetch(`${QPAY_BASE}/invoice`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      invoice_code: invoiceCode,
+      sender_invoice_no: params.orderId,
+      invoice_receiver_code: "terminal",
+      invoice_description: params.description,
+      amount: params.amount,
+      callback_url: params.callbackUrl,
+    }),
   });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `QPay invoice creation failed: ${response.status} ${response.statusText} — ${text}`
-    );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`QPay нэхэмжлэх үүсгэхэд алдаа: ${res.status} — ${text}`);
   }
 
-  return response.json();
+  return res.json();
 }
 
-/**
- * Check payment status for a QPay invoice.
- * Returns count of payments, total paid_amount, and individual payment rows.
- */
-export async function checkQPayPayment(
-  invoiceId: string
-): Promise<QPayPaymentCheckResponse> {
+// ── Check Payment ─────────────────────────────────────────────────────
+
+export async function checkPayment(invoiceId: string): Promise<QPayCheckResponse> {
   const token = await getQPayToken();
 
-  const response = await fetch(`${QPAY_BASE_URL}/payment/check`, {
+  const res = await fetch(`${QPAY_BASE}/payment/check`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -174,15 +147,30 @@ export async function checkQPayPayment(
     body: JSON.stringify({
       object_type: "INVOICE",
       object_id: invoiceId,
+      offset: { page_number: 1, page_limit: 100 },
     }),
   });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `QPay payment check failed: ${response.status} ${response.statusText} — ${text}`
-    );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`QPay төлбөр шалгахад алдаа: ${res.status} — ${text}`);
   }
 
-  return response.json();
+  return res.json();
+}
+
+// ── Cancel Invoice ────────────────────────────────────────────────────
+
+export async function cancelInvoice(invoiceId: string): Promise<void> {
+  const token = await getQPayToken();
+
+  const res = await fetch(`${QPAY_BASE}/invoice/${invoiceId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`QPay нэхэмжлэх цуцлахад алдаа: ${res.status} — ${text}`);
+  }
 }

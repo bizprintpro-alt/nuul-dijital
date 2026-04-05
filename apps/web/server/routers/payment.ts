@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, prisma } from "@/lib/trpc";
-import { createQPayInvoice, checkQPayPayment } from "@/lib/qpay";
+import { createInvoice, checkPayment as qpayCheck } from "@/lib/qpay";
 
 export const paymentRouter = router({
   createQPayInvoice: protectedProcedure
@@ -45,7 +45,7 @@ export const paymentRouter = router({
 
       const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/qpay/callback?orderId=${order.id}`;
 
-      const qpayResponse = await createQPayInvoice({
+      const qpayResponse = await createInvoice({
         orderId: order.id,
         amount: order.amount,
         description,
@@ -100,7 +100,7 @@ export const paymentRouter = router({
 
       // Check QPay if we have an invoice ID
       if (payment.qpayInvoiceId) {
-        const qpayResult = await checkQPayPayment(payment.qpayInvoiceId);
+        const qpayResult = await qpayCheck(payment.qpayInvoiceId);
 
         if (qpayResult.count > 0 && qpayResult.paid_amount >= payment.amount) {
           const transactionId = qpayResult.rows[0]?.payment_id ?? null;
