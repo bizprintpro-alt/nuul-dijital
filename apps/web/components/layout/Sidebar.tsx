@@ -6,14 +6,14 @@ import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, ChevronDown,
-  Shield, LogOut, Crown, X, Briefcase, FileText, LayoutList,
+  Shield, LogOut, Crown, X, Settings, Briefcase, FileText, LayoutList,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSidebar } from "./SidebarContext";
 
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
-  Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield, Crown,
+  Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield, Crown, Settings,
   Briefcase, FileText, LayoutList,
 };
 
@@ -73,6 +73,7 @@ const navGroups: NavGroup[] = [
       { label: "Бүх домэйн", href: "/dashboard/admin/domains", icon: "Globe" },
       { label: "Reseller удирдлага", href: "/dashboard/admin/resellers", icon: "Crown" },
       { label: "Хостинг планууд", href: "/dashboard/admin/hosting", icon: "Server" },
+      { label: "Тохиргоо", href: "/dashboard/admin/settings", icon: "Settings" },
     ],
   },
   {
