@@ -39,6 +39,8 @@ model User {
   notifications    Notification[]
   resellerProfile  ResellerProfile?
   referredBy       ResellerClient[]  @relation("ReferredClient")
+  serviceQuotes    ServiceQuote[]
+  blogPosts        BlogPost[]
 
   @@map("users")
 }
@@ -452,7 +454,140 @@ model Notification {
   @@map("notifications")
 }
 
+// ===================== SERVICES =====================
+
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String?
+  isActive    Boolean   @default(true)
+  order       Int       @default(0)
+  services    Service[]
+  createdAt   DateTime  @default(now())
+
+  @@map("service_categories")
+}
+
+model Service {
+  id           String          @id @default(cuid())
+  categoryId   String
+  category     ServiceCategory @relation(fields: [categoryId], references: [id])
+  name         String
+  description  String          @db.Text
+  features     String[]
+  price        Float?
+  priceFrom    Float?
+  priceTo      Float?
+  priceLabel   String?
+  deliveryDays Int?
+  isActive     Boolean         @default(true)
+  isFeatured   Boolean         @default(false)
+  isComingSoon Boolean         @default(false)
+  order        Int             @default(0)
+  quotes       ServiceQuote[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([categoryId])
+  @@map("services")
+}
+
+model ServiceQuote {
+  id            String      @id @default(cuid())
+  serviceId     String
+  service       Service     @relation(fields: [serviceId], references: [id])
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  name          String
+  email         String
+  phone         String
+  company       String?
+  projectType   String
+  description   String      @db.Text
+  budget        String?
+  deadline      String?
+  requirements  Json?
+  status        QuoteStatus @default(PENDING)
+  proposalDoc   String?     @db.Text
+  contractDoc   String?     @db.Text
+  agreedPrice   Float?
+  isPaid        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([serviceId])
+  @@map("service_quotes")
+}
+
+// ===================== BLOG =====================
+
+model BlogPost {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  excerpt     String?
+  content     String        @db.Text
+  coverImage  String?
+  videoUrl    String?
+  authorId    String
+  author      User          @relation(fields: [authorId], references: [id])
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  tags        String[]
+  status      PostStatus    @default(DRAFT)
+  featured    Boolean       @default(false)
+  viewCount   Int           @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([authorId])
+  @@map("blog_posts")
+}
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  name  String
+  slug  String     @unique
+  color String?
+  posts BlogPost[]
+
+  @@map("blog_categories")
+}
+
+// ===================== SITE SETTINGS =====================
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  type      String
+  group     String
+  label     String
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
 // ===================== ENUMS =====================
+
+enum QuoteStatus {
+  PENDING
+  REVIEWING
+  QUOTED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
 
 enum WebsiteStatus {
   DRAFT

@@ -11,6 +11,9 @@ import { emailMarketingRouter } from "./email-marketing";
 import { websiteRouter } from "./website";
 import { notificationRouter } from "./notification";
 import { resellerRouter } from "./reseller";
+import { settingsRouter } from "./settings";
+import { servicesRouter } from "./services";
+import { blogRouter } from "./blog";
 
 export const appRouter = router({
   domain: domainRouter,
@@ -25,6 +28,9 @@ export const appRouter = router({
   website: websiteRouter,
   notification: notificationRouter,
   reseller: resellerRouter,
+  settings: settingsRouter,
+  services: servicesRouter,
+  blog: blogRouter,
 });
 
 export type AppRouter = typeof appRouter;

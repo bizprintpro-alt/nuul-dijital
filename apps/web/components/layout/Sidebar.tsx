@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, ChevronDown,
-  Shield, LogOut, Crown, X,
+  Shield, LogOut, Crown, X, Briefcase, FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSidebar } from "./SidebarContext";
@@ -14,6 +14,7 @@ import { useSidebar } from "./SidebarContext";
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield, Crown,
+  Briefcase, FileText,
 };
 
 interface NavItem {
@@ -77,6 +78,14 @@ const navGroups: NavGroup[] = [
     roles: ["RESELLER", "ADMIN"],
     items: [
       { label: "Reseller панел", href: "/dashboard/reseller", icon: "Crown" },
+    ],
+  },
+  {
+    group: "КОНТЕНТ",
+    roles: ["ADMIN"],
+    items: [
+      { label: "Үйлчилгээ", href: "/dashboard/admin/services", icon: "Briefcase" },
+      { label: "Блог", href: "/dashboard/admin/blog", icon: "FileText" },
     ],
   },
   {

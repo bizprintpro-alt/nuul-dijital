@@ -210,15 +210,27 @@ export default function HomePage() {
         </Link>
 
         <div className="relative z-10 hidden gap-0 md:flex">
-          {["Үйлчилгээ", "Домэйн", "Үнэ", "Харилцагчид"].map((l, i) => (
-            <a
-              key={l}
-              href={["#svc", "#domain", "#price", "#testi"][i]}
-              className="rounded-lg px-4 py-2 text-[13px] text-txt-2 transition-all hover:bg-white/[0.03] hover:text-txt"
-            >
-              {l}
-            </a>
-          ))}
+          {["Үйлчилгээ", "Домэйн", "Үнэ", "Харилцагчид", "Блог", "Бидний тухай", "Холбоо барих"].map((l, i) => {
+            const hrefs = ["/services", "#domain", "#price", "#testi", "/blog", "/about", "/contact"];
+            const isExternal = hrefs[i].startsWith("/");
+            return isExternal ? (
+              <Link
+                key={l}
+                href={hrefs[i]}
+                className="rounded-lg px-4 py-2 text-[13px] text-txt-2 transition-all hover:bg-white/[0.03] hover:text-txt"
+              >
+                {l}
+              </Link>
+            ) : (
+              <a
+                key={l}
+                href={hrefs[i]}
+                className="rounded-lg px-4 py-2 text-[13px] text-txt-2 transition-all hover:bg-white/[0.03] hover:text-txt"
+              >
+                {l}
+              </a>
+            );
+          })}
         </div>
 
         <div className="relative z-10 flex items-center gap-2">

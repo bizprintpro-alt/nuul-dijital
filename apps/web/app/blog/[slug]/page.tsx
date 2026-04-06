@@ -1,0 +1,292 @@
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Metadata } from "next";
+import {
+  Calendar,
+  Eye,
+  ArrowLeft,
+  Tag,
+  Link2,
+  BookOpen,
+} from "lucide-react";
+
+interface Props {
+  params: { slug: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await prisma.blogPost.findUnique({
+    where: { slug: params.slug },
+    select: { title: true, excerpt: true, coverImage: true },
+  });
+
+  if (!post) return { title: "Not Found" };
+
+  return {
+    title: `${post.title} | Nuul.mn Блог`,
+    description: post.excerpt ?? undefined,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      images: post.coverImage ? [post.coverImage] : undefined,
+    },
+  };
+}
+
+function formatDate(d: Date | string) {
+  return new Date(d).toLocaleDateString("mn-MN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const post = await prisma.blogPost.findUnique({
+    where: { slug: params.slug },
+    include: {
+      author: { select: { id: true, name: true, image: true } },
+      category: { select: { id: true, name: true, slug: true, color: true } },
+    },
+  });
+
+  if (!post || post.status !== "PUBLISHED") {
+    notFound();
+  }
+
+  // Increment view count
+  await prisma.blogPost
+    .update({
+      where: { id: post.id },
+      data: { viewCount: { increment: 1 } },
+    })
+    .catch(() => {});
+
+  // Related posts
+  const related = await prisma.blogPost.findMany({
+    where: {
+      status: "PUBLISHED",
+      id: { not: post.id },
+      ...(post.categoryId ? { categoryId: post.categoryId } : {}),
+    },
+    include: {
+      author: { select: { name: true } },
+      category: { select: { name: true, color: true } },
+    },
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+  });
+
+  const postUrl = `https://nuul.mn/blog/${post.slug}`;
+
+  return (
+    <div className="min-h-screen bg-[#030310] text-white">
+      {/* ── Nav ── */}
+      <nav className="fixed inset-x-0 top-0 z-[500] flex h-[66px] items-center justify-between px-6 sm:px-12">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030310CC] to-transparent" />
+        <div className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+        <Link href="/" className="relative z-10 flex items-center gap-2.5">
+          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-[#7B6FFF] to-[#6358E0] shadow-[0_0_20px_#7B6FFF40]">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L16 14H2Z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
+              <path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45" />
+              <circle cx="9" cy="9" r="1.6" fill="#fff" />
+            </svg>
+          </div>
+          <span className="font-syne text-lg font-semibold tracking-tight">
+            nuul<span className="text-[#9F98FF]">.mn</span>
+          </span>
+        </Link>
+
+        <div className="relative z-10 hidden gap-0 md:flex">
+          {[
+            { label: "Нүүр", href: "/" },
+            { label: "Үйлчилгээ", href: "/services" },
+            { label: "Блог", href: "/blog" },
+            { label: "Холбоо барих", href: "/#contact" },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="rounded-lg px-4 py-2 text-[13px] text-white/60 transition-all hover:bg-white/[0.03] hover:text-white"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="relative z-10 flex items-center gap-2">
+          <Link
+            href="/auth/signin"
+            className="rounded-[9px] border border-white/10 px-5 py-2 text-[13px] font-medium text-white/60 transition-all hover:border-[#7B6FFF40] hover:text-white"
+          >
+            Нэвтрэх
+          </Link>
+        </div>
+      </nav>
+
+      {/* ── Article ── */}
+      <article className="mx-auto max-w-3xl px-6 pb-20 pt-[110px]">
+        {/* Back */}
+        <Link
+          href="/blog"
+          className="mb-6 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-white/40 transition-all hover:bg-white/[0.04] hover:text-white/60"
+        >
+          <ArrowLeft size={14} />
+          Блог руу буцах
+        </Link>
+
+        {/* Cover image */}
+        {post.coverImage && (
+          <div className="mb-8 overflow-hidden rounded-2xl">
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full object-cover"
+              style={{ maxHeight: 440 }}
+            />
+          </div>
+        )}
+
+        {/* Meta */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          {post.category && (
+            <span
+              className="rounded-full px-3 py-1 text-[12px] font-medium"
+              style={{
+                backgroundColor: `${post.category.color ?? "#7B6FFF"}18`,
+                color: post.category.color ?? "#9F98FF",
+              }}
+            >
+              {post.category.name}
+            </span>
+          )}
+          <span className="flex items-center gap-1 text-[12px] text-white/35">
+            <Calendar size={12} />
+            {post.publishedAt ? formatDate(post.publishedAt) : ""}
+          </span>
+          <span className="flex items-center gap-1 text-[12px] text-white/35">
+            <Eye size={12} />
+            {post.viewCount} уншсан
+          </span>
+        </div>
+
+        {/* Title */}
+        <h1 className="mb-4 font-syne text-[clamp(28px,4vw,42px)] font-bold leading-tight tracking-[-1px]">
+          {post.title}
+        </h1>
+
+        {/* Author */}
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#7B6FFF20] text-[13px] font-bold text-[#9F98FF]">
+            {post.author?.name?.charAt(0) ?? "N"}
+          </div>
+          <div>
+            <div className="text-[13px] font-medium">{post.author?.name}</div>
+          </div>
+        </div>
+
+        {/* Video embed */}
+        {post.videoUrl && (
+          <div className="mb-8 aspect-video overflow-hidden rounded-2xl border border-white/[0.08]">
+            <iframe
+              src={post.videoUrl.replace("watch?v=", "embed/")}
+              className="h-full w-full"
+              allowFullScreen
+              title={post.title}
+            />
+          </div>
+        )}
+
+        {/* Content */}
+        <div
+          className="prose prose-invert prose-lg max-w-none prose-headings:font-syne prose-headings:tracking-tight prose-h2:text-xl prose-h3:text-lg prose-p:text-white/70 prose-p:leading-relaxed prose-a:text-[#7B6FFF] prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-li:text-white/70 prose-code:text-[#00E5B8] prose-pre:bg-white/[0.04] prose-pre:border prose-pre:border-white/[0.06] prose-img:rounded-xl"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="mt-10 flex flex-wrap items-center gap-2 border-t border-white/[0.06] pt-6">
+            <Tag size={14} className="text-white/30" />
+            {post.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="rounded-full bg-white/[0.04] px-3 py-1 text-[12px] text-white/50"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Share */}
+        <div className="mt-6 flex items-center gap-3 border-t border-white/[0.06] pt-6">
+          <span className="text-[13px] text-white/40">Хуваалцах:</span>
+          <button
+            onClick={() => {
+              if (typeof navigator !== "undefined") {
+                navigator.clipboard.writeText(postUrl);
+              }
+            }}
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-[12px] text-white/50 transition-all hover:bg-white/[0.04] hover:text-white/70"
+          >
+            <Link2 size={13} />
+            Линк хуулах
+          </button>
+        </div>
+      </article>
+
+      {/* ── Related Posts ── */}
+      {related.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 pb-20">
+          <h2 className="mb-6 font-syne text-xl font-bold">Холбоотой нийтлэлүүд</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((r) => (
+              <Link key={r.id} href={`/blog/${r.slug}`}>
+                <div className="group overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] transition-all hover:border-[#7B6FFF30]">
+                  {r.coverImage ? (
+                    <div className="aspect-[16/10] overflow-hidden">
+                      <img
+                        src={r.coverImage}
+                        alt={r.title}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-[16/10] items-center justify-center bg-gradient-to-br from-[#7B6FFF10] to-[#00E5B808]">
+                      <BookOpen size={28} className="text-white/10" />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    {r.category && (
+                      <span
+                        className="mb-1.5 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                        style={{
+                          backgroundColor: `${r.category.color ?? "#7B6FFF"}18`,
+                          color: r.category.color ?? "#9F98FF",
+                        }}
+                      >
+                        {r.category.name}
+                      </span>
+                    )}
+                    <h3 className="line-clamp-2 font-syne text-[14px] font-bold leading-snug">
+                      {r.title}
+                    </h3>
+                    <div className="mt-2 flex items-center gap-2 text-[11px] text-white/30">
+                      <span>{r.author?.name}</span>
+                      <span>
+                        {r.publishedAt ? formatDate(r.publishedAt) : ""}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
