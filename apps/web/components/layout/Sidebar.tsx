@@ -23,6 +23,7 @@ interface NavItem {
   icon: string;
   badge?: string;
   roles?: string[];
+  featureKey?: string; // maps to site_settings feature_xxx
 }
 
 interface NavGroup {
@@ -41,25 +42,25 @@ const navGroups: NavGroup[] = [
   {
     group: "ДОМЭЙН & ХОСТ",
     items: [
-      { label: "Домэйн захиалах", href: "/dashboard/domains", icon: "Globe" },
-      { label: "Хостинг", href: "/dashboard/hosting", icon: "Server", badge: "Шинэ" },
-      { label: "VPS/Cloud", href: "/dashboard/vps", icon: "Cloud" },
+      { label: "Домэйн захиалах", href: "/dashboard/domains", icon: "Globe", featureKey: "feature_domain" },
+      { label: "Хостинг", href: "/dashboard/hosting", icon: "Server", badge: "Шинэ", featureKey: "feature_hosting" },
+      { label: "VPS/Cloud", href: "/dashboard/vps", icon: "Cloud", featureKey: "feature_vps_cloud" },
     ],
   },
   {
     group: "БИЗНЕСИЙН ХЭРЭГСЭЛ",
     items: [
-      { label: "Вэбсайт Builder", href: "/dashboard/website-builder", icon: "PanelsTopLeft" },
-      { label: "eSeller дэлгүүр", href: "/dashboard/eseller", icon: "ShoppingCart", badge: "4" },
-      { label: "И-мэйл маркетинг", href: "/dashboard/email-marketing", icon: "Mail" },
+      { label: "Вэбсайт Builder", href: "/dashboard/website-builder", icon: "PanelsTopLeft", featureKey: "feature_website_builder" },
+      { label: "eSeller дэлгүүр", href: "/dashboard/eseller", icon: "ShoppingCart", badge: "4", featureKey: "feature_eseller" },
+      { label: "И-мэйл маркетинг", href: "/dashboard/email-marketing", icon: "Mail", featureKey: "feature_email_marketing" },
     ],
   },
   {
     group: "AI ҮЙЛЧИЛГЭЭ",
     items: [
-      { label: "AI Чатбот Builder", href: "/dashboard/chatbot", icon: "Bot", badge: "AI" },
-      { label: "CRM & Борлуулалт", href: "/dashboard/crm", icon: "Users" },
-      { label: "Call Center 24/7", href: "/dashboard/call-center", icon: "Phone" },
+      { label: "AI Чатбот Builder", href: "/dashboard/chatbot", icon: "Bot", badge: "AI", featureKey: "feature_chatbot" },
+      { label: "CRM & Борлуулалт", href: "/dashboard/crm", icon: "Users", featureKey: "feature_crm" },
+      { label: "Call Center 24/7", href: "/dashboard/call-center", icon: "Phone", featureKey: "feature_call_center" },
     ],
   },
   {
@@ -111,6 +112,15 @@ export function Sidebar() {
   const { data: session } = useSession();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { mobileOpen, setMobileOpen } = useSidebar();
+  const [features, setFeatures] = useState<Record<string, string>>({});
+
+  // Fetch feature toggles from DB
+  useEffect(() => {
+    fetch("/api/settings/features")
+      .then((r) => r.json())
+      .then((d) => { if (d.features) setFeatures(d.features); })
+      .catch(() => {});
+  }, []);
 
   const userRole = (session?.user as { role?: string })?.role ?? "CLIENT";
   const userName = session?.user?.name ?? "Хэрэглэгч";
@@ -177,7 +187,25 @@ export function Sidebar() {
               {group.items.map((item) => {
                 const Icon = iconMap[item.icon] || LayoutDashboard;
                 const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
-                return (
+
+                // Feature toggle check
+                const fStatus = item.featureKey ? features[item.featureKey] : undefined;
+                if (fStatus === "false") return null; // hidden
+                const comingSoon = fStatus === "coming_soon";
+                const displayBadge = comingSoon ? "Тун удахгүй" : item.badge;
+
+                return comingSoon ? (
+                  <div
+                    key={item.href}
+                    className="group mb-0.5 flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium opacity-50"
+                  >
+                    <Icon size={17} className="text-txt-4" />
+                    <span className="flex-1 text-txt-3">{item.label}</span>
+                    <span className="rounded-md bg-[#FFB02E]/15 px-1.5 py-0.5 text-[10px] font-bold text-[#FFB02E]">
+                      Тун удахгүй
+                    </span>
+                  </div>
+                ) : (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -192,17 +220,17 @@ export function Sidebar() {
                       className={isActive ? "text-v" : "text-txt-3 group-hover:text-txt-2"}
                     />
                     <span className="flex-1">{item.label}</span>
-                    {item.badge && (
+                    {displayBadge && (
                       <span
                         className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                          item.badge === "AI"
+                          displayBadge === "AI"
                             ? "bg-v/15 text-v-soft"
-                            : item.badge === "Шинэ"
+                            : displayBadge === "Шинэ"
                               ? "bg-t/15 text-t"
                               : "bg-white/[0.06] text-txt-3"
                         }`}
                       >
-                        {item.badge}
+                        {displayBadge}
                       </span>
                     )}
                   </Link>
