@@ -71,6 +71,7 @@ const navGroups: NavGroup[] = [
       { label: "Бүх захиалга", href: "/dashboard/admin/orders", icon: "ShoppingCart" },
       { label: "Бүх домэйн", href: "/dashboard/admin/domains", icon: "Globe" },
       { label: "Reseller удирдлага", href: "/dashboard/admin/resellers", icon: "Crown" },
+      { label: "Хостинг планууд", href: "/dashboard/admin/hosting", icon: "Server" },
     ],
   },
   {

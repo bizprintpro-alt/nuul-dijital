@@ -667,6 +667,9 @@ enum PlanType {
   STARTER
   BUSINESS
   ENTERPRISE
+  VPS_BASIC
+  VPS_PRO
+  VPS_CLOUD
 }
 
 enum SubscriptionStatus {

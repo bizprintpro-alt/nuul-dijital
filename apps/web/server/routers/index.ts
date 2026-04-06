@@ -15,6 +15,7 @@ import { settingsRouter } from "./settings";
 import { servicesRouter } from "./services";
 import { blogRouter } from "./blog";
 import { navRouter } from "./nav";
+import { hostingRouter } from "./hosting";
 
 export const appRouter = router({
   domain: domainRouter,
@@ -33,6 +34,7 @@ export const appRouter = router({
   services: servicesRouter,
   blog: blogRouter,
   nav: navRouter,
+  hosting: hostingRouter,
 });
 
 export type AppRouter = typeof appRouter;

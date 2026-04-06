@@ -16,80 +16,17 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { PaymentModal } from "@/components/payments/PaymentModal";
+import { trpc } from "@/lib/trpc-client";
 
-// ── Plan data ────────────────────────────────────────────────────────
+// ── Types ────────────────────────────────────────────────────────────
 
 type PlanKey = "STARTER" | "BUSINESS" | "ENTERPRISE";
 
-interface Plan {
-  key: PlanKey;
-  name: string;
-  price: number;
-  priceLabel: string;
-  desc: string;
-  features: string[];
-  featured: boolean;
-  icon: typeof Cpu;
-}
-
-const plans: Plan[] = [
-  {
-    key: "STARTER",
-    name: "Starter",
-    price: 99000,
-    priceLabel: "₮99,000",
-    desc: "Эхлэгч бизнест тохирсон",
-    features: [
-      "2 vCPU, 4GB RAM",
-      "40GB SSD диск",
-      "Nginx + PHP 8.2",
-      "WordPress суулгасан",
-      "SSL сертификат",
-      "Дэмжлэг 9-18 цаг",
-    ],
-    featured: false,
-    icon: HardDrive,
-  },
-  {
-    key: "BUSINESS",
-    name: "Business",
-    price: 249000,
-    priceLabel: "₮249,000",
-    desc: "Өсөн дэвших бизнест",
-    features: [
-      "4 vCPU, 8GB RAM",
-      "80GB SSD диск",
-      "Nginx + PHP 8.2",
-      "WordPress суулгасан",
-      "SSL сертификат",
-      "AI чатбот интеграц",
-      "Дэмжлэг 24/7",
-    ],
-    featured: true,
-    icon: Cpu,
-  },
-  {
-    key: "ENTERPRISE",
-    name: "Enterprise",
-    price: 490000,
-    priceLabel: "₮490,000",
-    desc: "Том байгууллагад",
-    features: [
-      "8 vCPU, 16GB RAM",
-      "160GB SSD диск",
-      "Nginx + PHP 8.2",
-      "WordPress суулгасан",
-      "SSL сертификат",
-      "AI чатбот + CRM",
-      "Dedicated manager",
-      "Дэмжлэг 24/7",
-    ],
-    featured: false,
-    icon: Shield,
-  },
-];
-
-// ── Types ────────────────────────────────────────────────────────────
+const PLAN_ICONS: Record<string, typeof Cpu> = {
+  STARTER: HardDrive,
+  BUSINESS: Cpu,
+  ENTERPRISE: Shield,
+};
 
 interface HostingAccount {
   id: string;
@@ -107,12 +44,15 @@ type ProvisioningStep = "idle" | "ordering" | "paying" | "creating" | "installin
 // ── Component ────────────────────────────────────────────────────────
 
 export default function HostingPage() {
+  // Fetch plans from DB
+  const { data: plans, isLoading: plansLoading } = trpc.hosting.getHostingPlans.useQuery();
+
   // Hosting accounts state
   const [accounts, setAccounts] = useState<HostingAccount[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
 
   // Provisioning flow state
-  const [selectedPlan, setSelectedPlan] = useState<PlanKey | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [provisioningStep, setProvisioningStep] = useState<ProvisioningStep>("idle");
   const [provisioningAccountId, setProvisioningAccountId] = useState<string | null>(null);
 
@@ -171,7 +111,6 @@ export default function HostingPage() {
         if (data.status === "ACTIVE") {
           setProvisioningStep("done");
           clearInterval(interval);
-          // Refresh accounts list
           fetchAccounts();
         } else if (provisioningStep === "creating") {
           setProvisioningStep("installing");
@@ -186,18 +125,15 @@ export default function HostingPage() {
 
   // ── Handle plan selection ────────────────────────────────────────
 
-  const handleSelectPlan = async (planKey: PlanKey) => {
-    setSelectedPlan(planKey);
+  const handleSelectPlan = async (planType: string, price: number, planName: string) => {
+    setSelectedPlan(planType);
     setProvisioningStep("ordering");
 
     try {
-      const plan = plans.find((p) => p.key === planKey)!;
-
-      // Create order
       const orderRes = await fetch("/api/hosting/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: plan.key, amount: plan.price }),
+        body: JSON.stringify({ planType, amount: price }),
       });
 
       if (!orderRes.ok) {
@@ -206,14 +142,13 @@ export default function HostingPage() {
 
       const order = await orderRes.json();
 
-      // Create QPay invoice
       const qpayRes = await fetch("/api/payments/qpay/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
-          amount: plan.price,
-          description: `${plan.name} хостинг — nuul.mn`,
+          amount: price,
+          description: `${planName} хостинг — nuul.mn`,
         }),
       });
 
@@ -229,7 +164,7 @@ export default function HostingPage() {
         qrText: qpayResult.qrText,
         shortUrl: qpayResult.shortUrl,
         deeplinks: qpayResult.deeplinks,
-        amount: plan.price,
+        amount: price,
         orderId: order.id,
       });
 
@@ -263,7 +198,6 @@ export default function HostingPage() {
 
       const data = await res.json();
       setProvisioningAccountId(data.accountId);
-      // Polling will handle the rest via the useEffect above
     } catch (error) {
       console.error("[HOSTING] Provision error:", error);
       setProvisioningStep("idle");
@@ -327,16 +261,14 @@ export default function HostingPage() {
     }
   };
 
-  const planLabel = (type: PlanKey) => {
-    switch (type) {
-      case "STARTER":
-        return "Starter";
-      case "BUSINESS":
-        return "Business";
-      case "ENTERPRISE":
-        return "Enterprise";
-    }
+  const planLabel = (type: string) => {
+    const found = plans?.find((p) => p.type === type);
+    return found?.name ?? type;
   };
+
+  function formatPrice(n: number) {
+    return new Intl.NumberFormat("mn-MN").format(n);
+  }
 
   // ── Provisioning progress UI ─────────────────────────────────────
 
@@ -442,75 +374,100 @@ export default function HostingPage() {
       {renderProvisioningProgress()}
 
       {/* Plan cards */}
-      <div className="mb-12 grid items-start gap-4 md:grid-cols-3">
-        {plans.map((plan) => {
-          const Icon = plan.icon;
-          const isOrdering = selectedPlan === plan.key && provisioningStep !== "idle" && provisioningStep !== "done";
-
-          return (
-            <div
-              key={plan.key}
-              className={`relative overflow-hidden rounded-2xl border p-7 transition-all hover:-translate-y-1 ${
-                plan.featured
-                  ? "border-v/20 bg-gradient-to-br from-bg-3 to-bg-4 shadow-[0_0_40px_rgba(108,99,255,0.1)]"
-                  : "border-white/[0.04] bg-bg-2"
-              }`}
-            >
-              {plan.featured && (
-                <>
-                  <div className="absolute left-[10%] right-[10%] top-0 h-0.5 bg-gradient-to-r from-transparent via-v to-transparent" />
-                  <span className="mb-3 inline-block rounded-md border border-v/20 bg-v/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-v-soft">
-                    Хамгийн их сонгогддог
-                  </span>
-                </>
-              )}
-
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                <Icon size={20} className="text-v" />
-              </div>
-
-              <h3 className="font-syne text-xl font-bold text-txt">{plan.name}</h3>
-              <div className="mt-2 font-syne text-3xl font-bold tracking-tight text-gradient-txt-vg">
-                {plan.priceLabel}
-                <span className="text-sm font-normal text-txt-3">/сар</span>
-              </div>
-              <p className="mt-1 text-[12px] text-txt-3">{plan.desc}</p>
-
-              <div className="my-5 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-              <div className="mb-6 space-y-2.5">
-                {plan.features.map((f) => (
-                  <div key={f} className="flex items-center gap-2 text-[12px] text-txt-2">
-                    <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-[5px] border border-t/30 bg-t/10">
-                      <Check size={9} className="text-t" />
-                    </div>
-                    {f}
-                  </div>
+      {plansLoading ? (
+        <div className="mb-12 grid items-start gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-2xl border border-white/[0.04] bg-bg-2 p-7">
+              <div className="mb-3 h-10 w-10 rounded-xl bg-white/[0.04]" />
+              <div className="mb-2 h-6 w-24 rounded bg-white/[0.04]" />
+              <div className="mb-4 h-10 w-36 rounded bg-white/[0.04]" />
+              <div className="space-y-2">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="h-4 w-full rounded bg-white/[0.04]" />
                 ))}
               </div>
+            </div>
+          ))}
+        </div>
+      ) : !plans?.length ? (
+        <div className="mb-12 flex flex-col items-center justify-center rounded-2xl border border-white/[0.04] bg-bg-2 py-16">
+          <Server size={32} className="mb-3 text-txt-3" />
+          <p className="text-[13px] text-txt-3">Хостинг план байхгүй</p>
+        </div>
+      ) : (
+        <div className="mb-12 grid items-start gap-4 md:grid-cols-3">
+          {plans.map((plan, idx) => {
+            const Icon = PLAN_ICONS[plan.type] ?? HardDrive;
+            const featured = idx === 1;
+            const isOrdering = selectedPlan === plan.type && provisioningStep !== "idle" && provisioningStep !== "done";
 
-              <button
-                onClick={() => handleSelectPlan(plan.key)}
-                disabled={isOrdering}
-                className={`w-full rounded-xl py-3 text-[13px] font-bold transition-all disabled:opacity-50 ${
-                  plan.featured
-                    ? "bg-v text-white shadow-[0_0_20px_rgba(108,99,255,0.25)] hover:shadow-[0_0_30px_rgba(108,99,255,0.4)]"
-                    : "border border-v/20 text-v-soft hover:bg-v/5"
+            return (
+              <div
+                key={plan.id}
+                className={`relative overflow-hidden rounded-2xl border p-7 transition-all hover:-translate-y-1 ${
+                  featured
+                    ? "border-v/20 bg-gradient-to-br from-bg-3 to-bg-4 shadow-[0_0_40px_rgba(108,99,255,0.1)]"
+                    : "border-white/[0.04] bg-bg-2"
                 }`}
               >
-                {isOrdering ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 size={14} className="animate-spin" />
-                    Боловсруулж байна...
-                  </span>
-                ) : (
-                  "Захиалах"
+                {featured && (
+                  <>
+                    <div className="absolute left-[10%] right-[10%] top-0 h-0.5 bg-gradient-to-r from-transparent via-v to-transparent" />
+                    <span className="mb-3 inline-block rounded-md border border-v/20 bg-v/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-v-soft">
+                      Хамгийн их сонгогддог
+                    </span>
+                  </>
                 )}
-              </button>
-            </div>
-          );
-        })}
-      </div>
+
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03]">
+                  <Icon size={20} className="text-v" />
+                </div>
+
+                <h3 className="font-syne text-xl font-bold text-txt">{plan.name}</h3>
+                <div className="mt-2 font-syne text-3xl font-bold tracking-tight text-gradient-txt-vg">
+                  ₮{formatPrice(plan.price)}
+                  <span className="text-sm font-normal text-txt-3">/сар</span>
+                </div>
+                {plan.description && (
+                  <p className="mt-1 text-[12px] text-txt-3">{plan.description}</p>
+                )}
+
+                <div className="my-5 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+                <div className="mb-6 space-y-2.5">
+                  {plan.features.map((f) => (
+                    <div key={f} className="flex items-center gap-2 text-[12px] text-txt-2">
+                      <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-[5px] border border-t/30 bg-t/10">
+                        <Check size={9} className="text-t" />
+                      </div>
+                      {f}
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handleSelectPlan(plan.type, plan.price, plan.name)}
+                  disabled={isOrdering}
+                  className={`w-full rounded-xl py-3 text-[13px] font-bold transition-all disabled:opacity-50 ${
+                    featured
+                      ? "bg-v text-white shadow-[0_0_20px_rgba(108,99,255,0.25)] hover:shadow-[0_0_30px_rgba(108,99,255,0.4)]"
+                      : "border border-v/20 text-v-soft hover:bg-v/5"
+                  }`}
+                >
+                  {isOrdering ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 size={14} className="animate-spin" />
+                      Боловсруулж байна...
+                    </span>
+                  ) : (
+                    "Захиалах"
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* My hosting accounts */}
       <div>
@@ -559,7 +516,6 @@ export default function HostingPage() {
                     key={account.id}
                     className="border-b border-white/[0.02] transition hover:bg-white/[0.02]"
                   >
-                    {/* Domain / IP */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <Globe size={14} className="text-v" />
@@ -575,8 +531,6 @@ export default function HostingPage() {
                         </div>
                       </div>
                     </td>
-
-                    {/* Status */}
                     <td className="px-5 py-4">
                       <div className={`flex items-center gap-1.5 text-[12px] font-medium ${statusColor(account.status)}`}>
                         {account.status === "PROVISIONING" && (
@@ -591,15 +545,11 @@ export default function HostingPage() {
                         {statusLabel(account.status)}
                       </div>
                     </td>
-
-                    {/* Plan */}
                     <td className="px-5 py-4">
                       <span className="rounded-md bg-v/10 px-2 py-0.5 text-[11px] font-medium text-v-soft">
                         {planLabel(account.planType)}
                       </span>
                     </td>
-
-                    {/* Date */}
                     <td className="px-5 py-4 text-[12px] text-txt-3">
                       {new Date(account.createdAt).toLocaleDateString("mn-MN", {
                         year: "numeric",
@@ -607,8 +557,6 @@ export default function HostingPage() {
                         day: "numeric",
                       })}
                     </td>
-
-                    {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">
                         {account.status === "ACTIVE" && (

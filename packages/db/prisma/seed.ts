@@ -261,7 +261,107 @@ async function main() {
     },
   });
 
-  console.log("  ✅ 3 hosting plans created");
+  // VPS Plans
+  await prisma.hostingPlan.upsert({
+    where: { slug: "vps-basic" },
+    update: {
+      price: 199000,
+      storage: 80,
+      bandwidth: 2000,
+      websites: 5,
+      emails: 10,
+    },
+    create: {
+      name: "VPS Basic",
+      slug: "vps-basic",
+      type: "VPS_BASIC",
+      description: "Эхлэл шатны виртуал сервер",
+      price: 199000,
+      storage: 80,
+      bandwidth: 2000,
+      websites: 5,
+      emails: 10,
+      features: [
+        "2 vCPU",
+        "4GB RAM",
+        "80GB SSD",
+        "Ubuntu/CentOS",
+        "Root access",
+        "99.9% uptime",
+        "Snapshot backup",
+      ],
+      isActive: true,
+    },
+  });
+
+  await prisma.hostingPlan.upsert({
+    where: { slug: "vps-pro" },
+    update: {
+      price: 399000,
+      storage: 160,
+      bandwidth: 4000,
+      websites: 20,
+      emails: 50,
+    },
+    create: {
+      name: "VPS Pro",
+      slug: "vps-pro",
+      type: "VPS_PRO",
+      description: "Дунд болон том төслүүдэд зориулсан",
+      price: 399000,
+      storage: 160,
+      bandwidth: 4000,
+      websites: 20,
+      emails: 50,
+      features: [
+        "4 vCPU",
+        "8GB RAM",
+        "160GB SSD",
+        "Ubuntu/CentOS/Windows",
+        "Root access",
+        "99.99% uptime",
+        "Auto backup",
+        "DDoS хамгаалалт",
+      ],
+      isActive: true,
+    },
+  });
+
+  await prisma.hostingPlan.upsert({
+    where: { slug: "vps-cloud" },
+    update: {
+      price: 799000,
+      storage: 320,
+      bandwidth: 0,
+      websites: 99,
+      emails: 99,
+    },
+    create: {
+      name: "Cloud Server",
+      slug: "vps-cloud",
+      type: "VPS_CLOUD",
+      description: "Томоохон байгууллагад зориулсан cloud сервер",
+      price: 799000,
+      storage: 320,
+      bandwidth: 0,
+      websites: 99,
+      emails: 99,
+      features: [
+        "8 vCPU",
+        "16GB RAM",
+        "320GB NVMe",
+        "Бүх OS",
+        "Dedicated IP",
+        "99.99% uptime",
+        "Auto scaling",
+        "Load balancer",
+        "24/7 дэмжлэг",
+      ],
+      isActive: true,
+    },
+  });
+
+  console.log("  ✅ 6 hosting + VPS plans created");
 
   // ===================== 3. DOMAINS (8) =====================
   console.log("🌐 Seeding domains...");
