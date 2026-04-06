@@ -33,8 +33,12 @@ model User {
   tickets         Ticket[]
   hostingAccounts HostingAccount[]
   chatMessages    ChatMessage[]
-  emailLists      EmailList[]
-  emailCampaigns  EmailCampaign[]
+  emailLists       EmailList[]
+  emailCampaigns   EmailCampaign[]
+  websites         Website[]
+  notifications    Notification[]
+  resellerProfile  ResellerProfile?
+  referredBy       ResellerClient[]  @relation("ReferredClient")
 
   @@map("users")
 }
@@ -366,7 +370,117 @@ model EmailTemplate {
   @@map("email_templates")
 }
 
+// ===================== WEBSITE BUILDER =====================
+
+model Website {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  name          String
+  domain        String?
+  subdomain     String?       @unique
+  template      String        @default("blank")
+  gjsData       Json?
+  publishedHtml String?       @db.Text
+  status        WebsiteStatus @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@map("websites")
+}
+
+// ===================== RESELLER =====================
+
+model ResellerProfile {
+  id             String             @id @default(cuid())
+  userId         String             @unique
+  user           User               @relation(fields: [userId], references: [id])
+  companyName    String
+  commissionRate Float              @default(0.20)
+  totalEarned    Float              @default(0)
+  balance        Float              @default(0)
+  status         ResellerStatus     @default(PENDING)
+  clients        ResellerClient[]
+  withdrawals    ResellerWithdrawal[]
+  createdAt      DateTime           @default(now())
+
+  @@map("reseller_profiles")
+}
+
+model ResellerClient {
+  id         String          @id @default(cuid())
+  resellerId String
+  reseller   ResellerProfile @relation(fields: [resellerId], references: [id])
+  clientId   String
+  client     User            @relation("ReferredClient", fields: [clientId], references: [id])
+  createdAt  DateTime        @default(now())
+
+  @@unique([resellerId, clientId])
+  @@map("reseller_clients")
+}
+
+model ResellerWithdrawal {
+  id          String           @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile  @relation(fields: [resellerId], references: [id])
+  amount      Float
+  bankName    String
+  accountNo   String
+  status      WithdrawalStatus @default(PENDING)
+  processedAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@map("reseller_withdrawals")
+}
+
+// ===================== NOTIFICATIONS =====================
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  type      NotifType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
 // ===================== ENUMS =====================
+
+enum WebsiteStatus {
+  DRAFT
+  PUBLISHED
+  UNPUBLISHED
+}
+
+enum ResellerStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  PAID
+  REJECTED
+}
+
+enum NotifType {
+  PAYMENT_SUCCESS
+  DOMAIN_EXPIRY
+  HOSTING_READY
+  SUPPORT_REPLY
+  COMMISSION_EARNED
+  SYSTEM
+}
 
 enum SubStatus {
   ACTIVE

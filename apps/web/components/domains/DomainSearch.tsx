@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc-client";
 import { generateSuggestions } from "@/lib/domain-suggestions";
-import { QPayModal } from "@/components/payments/QPayModal";
+import { PaymentModal } from "@/components/payments/PaymentModal";
 
 const TLD_BADGES = [".mn", ".com", ".org", ".net", ".shop"] as const;
 
@@ -236,7 +236,7 @@ export function DomainSearch() {
 
       {/* QPay Modal */}
       {qpay && (
-        <QPayModal
+        <PaymentModal
           open={true}
           onClose={() => setQpay(null)}
           onSuccess={handleQPaySuccess}

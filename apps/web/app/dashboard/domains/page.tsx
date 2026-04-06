@@ -4,7 +4,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { Globe, AlertTriangle, Loader2, RefreshCw, Search, List } from "lucide-react";
 import { DomainSearch } from "@/components/domains/DomainSearch";
-import { QPayModal } from "@/components/payments/QPayModal";
+import { PaymentModal } from "@/components/payments/PaymentModal";
 
 interface QPayState {
   invoiceId: string;
@@ -209,7 +209,7 @@ export default function DomainsPage() {
 
       {/* QPay Modal for renewal */}
       {qpay && (
-        <QPayModal
+        <PaymentModal
           open={true}
           onClose={() => setQpay(null)}
           onSuccess={() => { setQpay(null); userDomains.refetch(); }}

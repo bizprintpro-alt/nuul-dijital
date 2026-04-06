@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { Receipt, CreditCard, Loader2 } from "lucide-react";
-import { QPayModal } from "@/components/payments/QPayModal";
+import { PaymentModal } from "@/components/payments/PaymentModal";
 
 interface QPayState {
   invoiceId: string;
@@ -198,7 +198,7 @@ export default function InvoicesPage() {
 
       {/* QPay Modal */}
       {qpay && (
-        <QPayModal
+        <PaymentModal
           open={true}
           onClose={() => setQpay(null)}
           onSuccess={() => { setQpay(null); payments.refetch(); orders.refetch(); }}

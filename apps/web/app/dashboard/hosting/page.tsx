@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
-import { QPayModal } from "@/components/payments/QPayModal";
+import { PaymentModal } from "@/components/payments/PaymentModal";
 
 // ── Plan data ────────────────────────────────────────────────────────
 
@@ -643,7 +643,7 @@ export default function HostingPage() {
 
       {/* QPay Modal */}
       {qpayData && (
-        <QPayModal
+        <PaymentModal
           open={qpayOpen}
           onClose={() => {
             setQpayOpen(false);
