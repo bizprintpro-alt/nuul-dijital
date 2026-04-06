@@ -3,13 +3,19 @@ import { DomainSearch } from "@/components/domain-search";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { Marquee } from "@/components/marquee";
 import { FAQ } from "@/components/landing/FAQ";
+import { ServiceGrid } from "@/components/landing/ServiceGrid";
 import { PublicNav } from "@/components/layout/PublicNav";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
 /* ── Service data ── */
-const services = [
+const services: Array<{
+  name: string; desc: string; tag: string; featureKey?: string;
+  iconBg: string; iconBorder: string; tagBg: string; tagColor: string; glow: string;
+  icon: React.ReactNode;
+}> = [
   {
     name: "Домэйн & Хост",
+    featureKey: "feature_domain",
     desc: ".mn .com .org хаягаа хайж олоод минутын дотор идэвхжүүл",
     tag: ".mn ₮165,000/жил",
     iconBg: "#7B6FFF18",
@@ -27,6 +33,7 @@ const services = [
   },
   {
     name: "Вэбсайт Builder",
+    featureKey: "feature_website_builder",
     desc: "Drag & drop загварчлал. 10 минутад бэлэн болох мэргэжлийн сайт",
     tag: "Загвар 50+",
     iconBg: "#00E5B815",
@@ -44,6 +51,7 @@ const services = [
   },
   {
     name: "AI Чатбот",
+    featureKey: "feature_chatbot",
     desc: "Монгол хэлтэй AI. Facebook, вэбсайт, Viber-д зэрэг ажилладаг",
     tag: "94% автомат",
     iconBg: "#FFB02E18",
@@ -59,6 +67,7 @@ const services = [
   },
   {
     name: "CRM Pipeline",
+    featureKey: "feature_crm",
     desc: "Харилцагчийн мэдээлэл, борлуулалтын дарааллыг нэг дороос хянах",
     tag: "Kanban + List",
     iconBg: "#FF6B9D18",
@@ -76,6 +85,7 @@ const services = [
   },
   {
     name: "Call Center",
+    featureKey: "feature_call_center",
     desc: "Callpro AI технологитой. Хоногийн 24 цаг автомат хариулт",
     tag: "24/7 · AI",
     iconBg: "#9F98FF18",
@@ -91,6 +101,7 @@ const services = [
   },
   {
     name: "eSeller",
+    featureKey: "feature_eseller",
     desc: "QPay & SocialPay интегратэй. Захиалга хүлээн авч автомат идэвхжүүл",
     tag: "98.7% автомат",
     iconBg: "#00E5B815",
@@ -287,46 +298,7 @@ export default function HomePage() {
             Өрсөлдөгчдийнх шиг 3 өөр компанид төлж, 3 өөр хаяг санах хэрэггүй.
           </p>
 
-          <div className="grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl border border-[--bdv] md:grid-cols-3">
-            {services.map((svc) => (
-              <Link
-                key={svc.name}
-                href="/dashboard"
-                className="group relative cursor-pointer overflow-hidden bg-bg-2 p-8 transition-colors hover:bg-bg-3"
-              >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#7B6FFF08] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <div
-                  className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl border transition-all group-hover:scale-105"
-                  style={{
-                    background: svc.iconBg,
-                    borderColor: svc.iconBorder,
-                  }}
-                >
-                  {svc.icon}
-                </div>
-                {/* Arrow */}
-                <svg
-                  className="svc-arrow absolute right-8 top-8 h-5 w-5 text-txt-3 opacity-0 transition-all"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                >
-                  <path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                <div className="mb-2 font-clash text-xl font-semibold tracking-tight">
-                  {svc.name}
-                </div>
-                <div className="mb-4 text-[13px] leading-relaxed text-txt-2">
-                  {svc.desc}
-                </div>
-                <span
-                  className="inline-flex rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
-                  style={{ background: svc.tagBg, color: svc.tagColor }}
-                >
-                  {svc.tag}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <ServiceGrid services={services} />
         </section>
       </ScrollReveal>
 
