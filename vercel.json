@@ -2,5 +2,11 @@
   "installCommand": "pnpm install",
   "buildCommand": "cd packages/db && pnpm exec prisma generate --schema=prisma/schema.prisma && cd ../../apps/web && pnpm exec next build",
   "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/domain-expiry",
+      "schedule": "0 9 * * *"
+    }
+  ]
 }

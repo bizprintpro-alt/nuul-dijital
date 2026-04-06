@@ -128,6 +128,15 @@ function SignInForm() {
               />
             </div>
 
+            <div className="flex justify-end">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs font-medium text-v transition hover:text-v-soft"
+              >
+                Нууц үг мартсан?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}

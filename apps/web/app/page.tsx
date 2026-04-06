@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DomainSearch } from "@/components/domain-search";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { Marquee } from "@/components/marquee";
+import { FAQ } from "@/components/landing/FAQ";
 
 /* ── Service data ── */
 const services = [
@@ -520,6 +521,121 @@ export default function HomePage() {
                     <div className="text-[11px] text-txt-3">{t.role}</div>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* ── COMPARISON TABLE ── */}
+      <ScrollReveal>
+        <section className="relative z-[2] px-6 py-24 sm:px-12">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-v">
+            <span className="inline-block h-px w-6 bg-v" />
+            Харьцуулалт
+          </div>
+          <h2 className="mb-3 font-syne text-[clamp(32px,4vw,48px)] font-bold leading-tight tracking-tight">
+            Яагаад Nuul.mn?
+          </h2>
+          <p className="mb-14 max-w-[500px] text-[15px] leading-relaxed text-txt-2">
+            Бусад платформуудтай харьцуулбал
+          </p>
+
+          <div className="overflow-x-auto rounded-2xl border border-white/[0.04]">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-white/[0.04] bg-bg-2">
+                  <th className="px-6 py-4 text-left text-txt-3 font-medium">Боломж</th>
+                  <th className="px-6 py-4 text-center font-bold text-v">Nuul.mn</th>
+                  <th className="px-6 py-4 text-center text-txt-3">Greensoft</th>
+                  <th className="px-6 py-4 text-center text-txt-3">Datacom</th>
+                  <th className="px-6 py-4 text-center text-txt-3">iTools</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: "Домэйн .mn", nuul: true, greensoft: true, datacom: true, itools: true },
+                  { feature: "Хостинг", nuul: true, greensoft: true, datacom: true, itools: true },
+                  { feature: "AI Чатбот", nuul: true, greensoft: false, datacom: false, itools: false },
+                  { feature: "CRM систем", nuul: true, greensoft: false, datacom: false, itools: true },
+                  { feature: "24/7 AI дэмжлэг", nuul: true, greensoft: false, datacom: false, itools: false },
+                  { feature: "QPay төлбөр", nuul: true, greensoft: true, datacom: false, itools: true },
+                  { feature: "Вэбсайт Builder", nuul: true, greensoft: false, datacom: true, itools: false },
+                ].map((row) => (
+                  <tr key={row.feature} className="border-b border-white/[0.04] bg-bg-2/50 transition-colors hover:bg-bg-3">
+                    <td className="px-6 py-3.5 text-left font-medium text-txt-2">{row.feature}</td>
+                    {[row.nuul, row.greensoft, row.datacom, row.itools].map((val, i) => (
+                      <td key={i} className="px-6 py-3.5 text-center">
+                        {val ? (
+                          <span className="text-t font-bold">&#10003;</span>
+                        ) : (
+                          <span className="text-red-400">&#10007;</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                <tr className="bg-bg-2">
+                  <td className="px-6 py-4 text-left font-bold text-txt">Эхлэх үнэ /сар</td>
+                  <td className="px-6 py-4 text-center font-bold text-v">&#8366;99,000</td>
+                  <td className="px-6 py-4 text-center text-txt-3">&#8366;150,000</td>
+                  <td className="px-6 py-4 text-center text-txt-3">&#8366;165,000</td>
+                  <td className="px-6 py-4 text-center text-txt-3">&#8366;180,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* ── FAQ ── */}
+      <ScrollReveal>
+        <section className="relative z-[2] px-6 py-24 sm:px-12">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-v">
+            <span className="inline-block h-px w-6 bg-v" />
+            Асуулт & Хариулт
+          </div>
+          <h2 className="mb-10 font-syne text-[clamp(32px,4vw,48px)] font-bold">
+            Түгээмэл асуултууд
+          </h2>
+          <div className="mx-auto max-w-[760px]">
+            <FAQ />
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* ── STEPS ── */}
+      <ScrollReveal>
+        <section className="relative z-[2] px-6 py-24 sm:px-12">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-v">
+            <span className="inline-block h-px w-6 bg-v" />
+            Хэрхэн эхлэх вэ
+          </div>
+          <h2 className="mb-14 font-syne text-[clamp(32px,4vw,48px)] font-bold leading-tight tracking-tight">
+            Хэдхэн минутад эхлэх
+          </h2>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { step: "01", title: "Бүртгүүлэх", desc: "Имэйл, утасны дугаараар 2 минутад бүртгэл хийнэ." },
+              { step: "02", title: "Домэйн хайх", desc: "Хүссэн .mn, .com, .org домэйнээ хайж шалгана." },
+              { step: "03", title: "Хостинг сонгох", desc: "Starter, Business, Enterprise багцаас сонгоно." },
+              { step: "04", title: "Вэбсайт бэлэн!", desc: "Загвар сонгоод drag & drop-оор сайтаа бэлдэнэ." },
+            ].map((item, i) => (
+              <div key={item.step} className="group relative flex flex-col items-center text-center">
+                {/* Arrow between steps */}
+                {i < 3 && (
+                  <div className="pointer-events-none absolute -right-3 top-8 z-10 hidden text-txt-3/30 lg:block">
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                )}
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[--bdv] bg-bg-2 font-syne text-xl font-bold text-v transition-all group-hover:border-v group-hover:shadow-[0_0_24px_#7B6FFF30]">
+                  {item.step}
+                </div>
+                <h3 className="mb-2 font-syne text-lg font-semibold tracking-tight">{item.title}</h3>
+                <p className="max-w-[200px] text-[13px] leading-relaxed text-txt-2">{item.desc}</p>
               </div>
             ))}
           </div>

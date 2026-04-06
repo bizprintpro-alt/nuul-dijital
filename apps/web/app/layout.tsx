@@ -2,8 +2,19 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nuul.mn — Таны дижитал үүл",
-  description: "Домэйн, хостинг, вэбсайт, AI чатбот, CRM - Монголын бизнесийн иж бүрэн дижитал платформ",
+  title: "Nuul.mn — Монголын дижитал платформ | Домэйн, Хостинг, AI",
+  description: "Домэйн бүртгэл, хостинг, вэбсайт builder, CRM, AI чатбот — бүгдийг нэг дороос. Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ.",
+  keywords: "домэйн mn, хостинг монгол, вэбсайт хийх, CRM систем, AI чатбот монгол, nuul.mn, QPay",
+  openGraph: {
+    title: "Nuul.mn — Таны дижитал үүл",
+    description: "Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ. Домэйн, хостинг, AI чатбот, CRM.",
+    url: "https://nuul.mn",
+    siteName: "Nuul.mn",
+    locale: "mn_MN",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Nuul.mn — Монголын дижитал платформ" },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
