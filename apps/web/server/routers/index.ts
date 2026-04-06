@@ -7,6 +7,7 @@ import { analyticsRouter } from "./analytics";
 import { crmRouter } from "./crm";
 import { ticketRouter } from "./ticket";
 import { adminRouter } from "./admin";
+import { emailMarketingRouter } from "./email-marketing";
 
 export const appRouter = router({
   domain: domainRouter,
@@ -17,6 +18,7 @@ export const appRouter = router({
   crm: crmRouter,
   ticket: ticketRouter,
   admin: adminRouter,
+  emailMarketing: emailMarketingRouter,
 });
 
 export type AppRouter = typeof appRouter;

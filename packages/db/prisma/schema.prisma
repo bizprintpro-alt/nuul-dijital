@@ -33,6 +33,8 @@ model User {
   tickets         Ticket[]
   hostingAccounts HostingAccount[]
   chatMessages    ChatMessage[]
+  emailLists      EmailList[]
+  emailCampaigns  EmailCampaign[]
 
   @@map("users")
 }
@@ -295,7 +297,92 @@ model ChatBotSession {
   @@map("chatbot_sessions")
 }
 
+// ===================== EMAIL MARKETING =====================
+
+model EmailList {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  name        String
+  description String?
+  subscribers EmailSubscriber[]
+  campaigns   EmailCampaign[]
+  createdAt   DateTime          @default(now())
+
+  @@index([userId])
+  @@map("email_lists")
+}
+
+model EmailSubscriber {
+  id             String    @id @default(cuid())
+  listId         String
+  list           EmailList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  email          String
+  name           String?
+  status         SubStatus @default(ACTIVE)
+  tags           String[]
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+
+  @@unique([listId, email])
+  @@index([listId])
+  @@map("email_subscribers")
+}
+
+model EmailCampaign {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  listId      String?
+  list        EmailList?     @relation(fields: [listId], references: [id])
+  name        String
+  subject     String
+  previewText String?
+  htmlContent String         @db.Text
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  totalSent   Int            @default(0)
+  delivered   Int            @default(0)
+  opened      Int            @default(0)
+  clicked     Int            @default(0)
+  bounced     Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+  @@map("email_campaigns")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  userId      String?
+  name        String
+  category    String
+  htmlContent String   @db.Text
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("email_templates")
+}
+
 // ===================== ENUMS =====================
+
+enum SubStatus {
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+  COMPLAINED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  PAUSED
+  CANCELLED
+}
 
 enum UserRole {
   ADMIN
