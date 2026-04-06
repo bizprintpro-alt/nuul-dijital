@@ -1473,6 +1473,22 @@ async function main() {
 
   console.log("  ✅ 2 email lists + 5 subscribers created");
 
+  // ===================== NAV ITEMS =====================
+  console.log("🧭 Seeding nav items...");
+  const navItems = [
+    { label: "Үйлчилгээ", labelEn: "Services", href: "/services", order: 1 },
+    { label: "Домэйн", labelEn: "Domain", href: "/#domain", order: 2 },
+    { label: "Үнэ", labelEn: "Pricing", href: "/#price", order: 3 },
+    { label: "Блог", labelEn: "Blog", href: "/blog", order: 4 },
+    { label: "Бидний тухай", labelEn: "About", href: "/about", order: 5 },
+    { label: "Холбоо барих", labelEn: "Contact", href: "/contact", order: 6 },
+  ];
+  await prisma.navItem.deleteMany();
+  for (const nav of navItems) {
+    await prisma.navItem.create({ data: { ...nav, isActive: true } });
+  }
+  console.log("  ✅ 6 nav items created");
+
   // ===================== DONE =====================
   console.log("\n🎉 Demo seed complete!");
   console.log("   Users: 8 (+1 existing)");

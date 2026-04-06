@@ -454,6 +454,22 @@ model Notification {
   @@map("notifications")
 }
 
+// ===================== NAVIGATION =====================
+
+model NavItem {
+  id        String   @id @default(cuid())
+  label     String
+  labelEn   String?
+  href      String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  openInNew Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("nav_items")
+}
+
 // ===================== SERVICES =====================
 
 model ServiceCategory {

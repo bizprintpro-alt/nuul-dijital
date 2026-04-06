@@ -2,15 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-
-const navLinks = [
-  { label: "Нүүр", href: "/" },
-  { label: "Үйлчилгээ", href: "/#svc" },
-  { label: "Блог", href: "/blog" },
-  { label: "Бидний тухай", href: "/about" },
-  { label: "Холбоо барих", href: "/contact" },
-];
+import { PublicNav } from "@/components/layout/PublicNav";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 const subjects = ["Домэйн", "Хостинг", "Чатбот", "CRM", "Бусад"];
 
@@ -125,46 +118,7 @@ export default function ContactPage() {
       <div className="grid-bg" />
 
       {/* ── NAV ── */}
-      <nav className="fixed inset-x-0 top-0 z-[500] flex h-[66px] items-center justify-between px-6 sm:px-12">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#03030ACC] to-transparent" />
-        <div className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-[--bdv] to-transparent" />
-
-        <Link href="/" className="relative z-10 flex items-center gap-2.5">
-          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-v to-v-dark shadow-[0_0_20px_#7B6FFF40,inset_0_1px_0_#FFFFFF20]">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-              <path d="M9 2L16 14H2Z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45" />
-              <circle cx="9" cy="9" r="1.6" fill="#fff" />
-            </svg>
-          </div>
-          <span className="font-clash text-lg font-semibold tracking-tight">
-            nuul<span className="text-v-soft">.mn</span>
-          </span>
-        </Link>
-
-        <div className="relative z-10 hidden gap-0 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className={`rounded-lg px-4 py-2 text-[13px] transition-all hover:bg-white/[0.03] hover:text-txt ${
-                link.href === "/contact" ? "text-txt" : "text-txt-2"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="relative z-10 flex items-center gap-2">
-          <Link
-            href="/auth/signin"
-            className="rounded-[9px] border border-[--bd] bg-transparent px-5 py-2 font-cabinet text-[13px] font-medium text-txt-2 transition-all hover:border-[--bdv] hover:text-txt"
-          >
-            Нэвтрэх
-          </Link>
-        </div>
-      </nav>
+      <PublicNav />
 
       {/* ── HERO ── */}
       <section className="relative z-[2] pt-28 pb-12 text-center px-6 sm:px-12">
@@ -415,37 +369,7 @@ export default function ContactPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-[2] flex flex-wrap items-center justify-between gap-4 border-t border-[--bd] px-6 py-8 sm:px-12">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-v to-v-dark">
-            <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
-              <path d="M9 2L16 14H2Z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45" />
-              <circle cx="9" cy="9" r="1.6" fill="#fff" />
-            </svg>
-          </div>
-          <span className="font-clash text-[15px] font-semibold">
-            nuul<span className="text-v-soft">.mn</span>
-          </span>
-        </div>
-        <div className="flex">
-          {[
-            { label: "Нөхцөл", href: "#" },
-            { label: "Нууцлал", href: "#" },
-            { label: "Блог", href: "/blog" },
-            { label: "Бидний тухай", href: "/about" },
-          ].map((l) => (
-            <Link
-              key={l.label}
-              href={l.href}
-              className="px-3.5 py-1 text-xs text-txt-3 transition-colors hover:text-txt-2"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </div>
-        <span className="text-[11px] text-txt-4">&copy; 2025 Nuul Digital LLC</span>
-      </footer>
+      <PublicFooter />
     </>
   );
 }

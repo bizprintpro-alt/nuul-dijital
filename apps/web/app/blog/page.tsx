@@ -12,6 +12,8 @@ import {
   Search,
   BookOpen,
 } from "lucide-react";
+import { PublicNav } from "@/components/layout/PublicNav";
+import { PublicFooter } from "@/components/layout/PublicFooter";
 
 function formatDate(d: string | Date) {
   return new Date(d).toLocaleDateString("mn-MN", {
@@ -44,52 +46,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-[#030310] text-white">
-      {/* ── Nav ── */}
-      <nav className="fixed inset-x-0 top-0 z-[500] flex h-[66px] items-center justify-between px-6 sm:px-12">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030310CC] to-transparent" />
-        <div className="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-        <Link href="/" className="relative z-10 flex items-center gap-2.5">
-          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-[#7B6FFF] to-[#6358E0] shadow-[0_0_20px_#7B6FFF40]">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-              <path d="M9 2L16 14H2Z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="M9 7L12.5 13H5.5Z" fill="#fff" opacity=".45" />
-              <circle cx="9" cy="9" r="1.6" fill="#fff" />
-            </svg>
-          </div>
-          <span className="font-syne text-lg font-semibold tracking-tight">
-            nuul<span className="text-[#9F98FF]">.mn</span>
-          </span>
-        </Link>
-
-        <div className="relative z-10 hidden gap-0 md:flex">
-          {[
-            { label: "Нүүр", href: "/" },
-            { label: "Үйлчилгээ", href: "/services" },
-            { label: "Блог", href: "/blog" },
-            { label: "Холбоо барих", href: "/#contact" },
-          ].map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`rounded-lg px-4 py-2 text-[13px] transition-all hover:bg-white/[0.03] hover:text-white ${
-                l.href === "/blog" ? "text-[#9F98FF]" : "text-white/60"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="relative z-10 flex items-center gap-2">
-          <Link
-            href="/auth/signin"
-            className="rounded-[9px] border border-white/10 px-5 py-2 text-[13px] font-medium text-white/60 transition-all hover:border-[#7B6FFF40] hover:text-white"
-          >
-            Нэвтрэх
-          </Link>
-        </div>
-      </nav>
+      <PublicNav />
 
       {/* ── Hero ── */}
       <section className="relative flex flex-col items-center px-6 pb-8 pt-[130px] text-center">
@@ -318,6 +275,8 @@ export default function BlogPage() {
           </button>
         </div>
       )}
+
+      <PublicFooter />
     </div>
   );
 }

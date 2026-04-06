@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc-client";
 import {
   Settings,
@@ -12,6 +13,8 @@ import {
   Save,
   CheckCircle,
   Loader2,
+  LayoutList,
+  ArrowRight,
 } from "lucide-react";
 
 /* ── Default settings (used when DB is empty) ── */
@@ -163,6 +166,23 @@ export default function AdminSettingsPage() {
           <p className="text-sm text-txt-2">Nuul.mn платформын ерөнхий тохиргоо</p>
         </div>
       </div>
+
+      {/* Nav manager link */}
+      <Link
+        href="/dashboard/admin/navigation"
+        className="flex items-center justify-between rounded-xl border border-white/[0.04] bg-bg-2 px-5 py-4 transition-all hover:border-v/20 hover:bg-v/[0.04]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-v/10">
+            <LayoutList className="h-4.5 w-4.5 text-v" />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-txt">Меню тохиргоо</span>
+            <p className="text-xs text-txt-3">Сайтын навигацийн менюг удирдах</p>
+          </div>
+        </div>
+        <ArrowRight size={16} className="text-txt-3" />
+      </Link>
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-white/[0.04] bg-bg-2 p-1">
