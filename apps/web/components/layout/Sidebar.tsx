@@ -98,6 +98,7 @@ const navGroups: NavGroup[] = [
       { label: "Аналитик", href: "/dashboard/analytics", icon: "BarChart3" },
       { label: "Нэхэмжлэх & Төлбөр", href: "/dashboard/invoices", icon: "Receipt" },
       { label: "AI Дэмжлэг", href: "/dashboard/support", icon: "Headphones" },
+      { label: "Тохиргоо", href: "/dashboard/settings", icon: "Settings" },
     ],
   },
 ];
