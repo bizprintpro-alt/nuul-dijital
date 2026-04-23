@@ -51,6 +51,25 @@ export default function ServicesPage() {
     budget: "",
     deadline: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function validateStep1() {
+    const e: Record<string, string> = {};
+    if (!form.name.trim()) e.name = "Нэрээ оруулна уу";
+    if (!form.email.trim()) e.email = "И-мэйл хаягаа оруулна уу";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Зөв и-мэйл формат оруулна уу";
+    if (!form.phone.trim()) e.phone = "Утасны дугаараа оруулна уу";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
+
+  function validateStep2() {
+    const e: Record<string, string> = {};
+    if (!form.projectType.trim()) e.projectType = "Төслийн төрлийг оруулна уу";
+    if (!form.description.trim()) e.description = "Төслийн тайлбар оруулна уу";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   const categories = trpc.services.getCategories.useQuery();
   const services = trpc.services.getServices.useQuery(
@@ -79,10 +98,12 @@ export default function ServicesPage() {
     setQuoteModal(true);
     setSuccess(false);
     setStep(1);
+    setErrors({});
   }
 
   function handleSubmit() {
     if (!selectedService) return;
+    if (!validateStep2()) return;
     submitQuote.mutate({
       serviceId: selectedService.id,
       ...form,
@@ -186,8 +207,27 @@ export default function ServicesPage() {
                   </li>
                 ))}
                 {svc.features.length > 4 && (
-                  <li className="text-[11px] text-white/30">
-                    +{svc.features.length - 4} бусад...
+                  <li
+                    className="group/more relative cursor-help text-[11px] text-white/40 hover:text-white/60"
+                    title={svc.features.slice(4).join("\n")}
+                  >
+                    +{svc.features.length - 4} бусад боломжууд
+                    <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg border border-white/[0.1] bg-[#0a0a1a] p-3 shadow-xl group-hover/more:block">
+                      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                        Бусад боломжууд
+                      </div>
+                      <ul className="space-y-1">
+                        {svc.features.slice(4).map((f, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-1.5 text-[12px] text-white/70"
+                          >
+                            <Check size={11} className="mt-0.5 flex-shrink-0 text-[#00E5B8]" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </li>
                 )}
               </ul>
@@ -291,12 +331,16 @@ export default function ServicesPage() {
                       </label>
                       <input
                         value={form.name}
-                        onChange={(e) =>
-                          setForm({ ...form, name: e.target.value })
-                        }
-                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:border-[#7B6FFF40] focus:bg-white/[0.05]"
+                        onChange={(e) => {
+                          setForm({ ...form, name: e.target.value });
+                          if (errors.name) setErrors({ ...errors, name: "" });
+                        }}
+                        className={`w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:bg-white/[0.05] ${
+                          errors.name ? "border-red-500/60" : "border-white/[0.08] focus:border-[#7B6FFF40]"
+                        }`}
                         placeholder="Таны бүтэн нэр"
                       />
+                      {errors.name && <p className="mt-1 text-[11px] text-red-400">{errors.name}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-medium text-white/60">
@@ -305,12 +349,16 @@ export default function ServicesPage() {
                       <input
                         type="email"
                         value={form.email}
-                        onChange={(e) =>
-                          setForm({ ...form, email: e.target.value })
-                        }
-                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:border-[#7B6FFF40] focus:bg-white/[0.05]"
+                        onChange={(e) => {
+                          setForm({ ...form, email: e.target.value });
+                          if (errors.email) setErrors({ ...errors, email: "" });
+                        }}
+                        className={`w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:bg-white/[0.05] ${
+                          errors.email ? "border-red-500/60" : "border-white/[0.08] focus:border-[#7B6FFF40]"
+                        }`}
                         placeholder="email@example.com"
                       />
+                      {errors.email && <p className="mt-1 text-[11px] text-red-400">{errors.email}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-medium text-white/60">
@@ -318,12 +366,16 @@ export default function ServicesPage() {
                       </label>
                       <input
                         value={form.phone}
-                        onChange={(e) =>
-                          setForm({ ...form, phone: e.target.value })
-                        }
-                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:border-[#7B6FFF40] focus:bg-white/[0.05]"
+                        onChange={(e) => {
+                          setForm({ ...form, phone: e.target.value });
+                          if (errors.phone) setErrors({ ...errors, phone: "" });
+                        }}
+                        className={`w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:bg-white/[0.05] ${
+                          errors.phone ? "border-red-500/60" : "border-white/[0.08] focus:border-[#7B6FFF40]"
+                        }`}
                         placeholder="9900 0000"
                       />
+                      {errors.phone && <p className="mt-1 text-[11px] text-red-400">{errors.phone}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-medium text-white/60">
@@ -339,9 +391,10 @@ export default function ServicesPage() {
                       />
                     </div>
                     <button
-                      onClick={() => setStep(2)}
-                      disabled={!form.name || !form.email || !form.phone}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#7B6FFF] py-3 text-[13px] font-bold text-white transition-all hover:bg-[#6B5FEF] disabled:opacity-40"
+                      onClick={() => {
+                        if (validateStep1()) setStep(2);
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#7B6FFF] py-3 text-[13px] font-bold text-white transition-all hover:bg-[#6B5FEF]"
                     >
                       Үргэлжлүүлэх
                       <ChevronRight size={15} />
@@ -357,12 +410,16 @@ export default function ServicesPage() {
                       </label>
                       <input
                         value={form.projectType}
-                        onChange={(e) =>
-                          setForm({ ...form, projectType: e.target.value })
-                        }
-                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:border-[#7B6FFF40] focus:bg-white/[0.05]"
+                        onChange={(e) => {
+                          setForm({ ...form, projectType: e.target.value });
+                          if (errors.projectType) setErrors({ ...errors, projectType: "" });
+                        }}
+                        className={`w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:bg-white/[0.05] ${
+                          errors.projectType ? "border-red-500/60" : "border-white/[0.08] focus:border-[#7B6FFF40]"
+                        }`}
                         placeholder="Жишээ: Вэбсайт хөгжүүлэлт"
                       />
+                      {errors.projectType && <p className="mt-1 text-[11px] text-red-400">{errors.projectType}</p>}
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-medium text-white/60">
@@ -370,13 +427,17 @@ export default function ServicesPage() {
                       </label>
                       <textarea
                         value={form.description}
-                        onChange={(e) =>
-                          setForm({ ...form, description: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setForm({ ...form, description: e.target.value });
+                          if (errors.description) setErrors({ ...errors, description: "" });
+                        }}
                         rows={3}
-                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:border-[#7B6FFF40] focus:bg-white/[0.05]"
+                        className={`w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none transition-all focus:bg-white/[0.05] ${
+                          errors.description ? "border-red-500/60" : "border-white/[0.08] focus:border-[#7B6FFF40]"
+                        }`}
                         placeholder="Төслийн дэлгэрэнгүй тайлбар..."
                       />
+                      {errors.description && <p className="mt-1 text-[11px] text-red-400">{errors.description}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -416,11 +477,7 @@ export default function ServicesPage() {
                       </button>
                       <button
                         onClick={handleSubmit}
-                        disabled={
-                          !form.projectType ||
-                          !form.description ||
-                          submitQuote.isPending
-                        }
+                        disabled={submitQuote.isPending}
                         className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#7B6FFF] py-3 text-[13px] font-bold text-white transition-all hover:bg-[#6B5FEF] disabled:opacity-40"
                       >
                         {submitQuote.isPending ? (

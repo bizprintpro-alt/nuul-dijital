@@ -192,7 +192,9 @@ export default function BlogPage() {
             />
           ))}
 
-        {posts.data?.posts?.map((post: any) => (
+        {posts.data?.posts?.map((post: any) => {
+          const categoryColor = post.category?.color ?? "#7B6FFF";
+          return (
           <Link key={post.id} href={`/blog/${post.slug}`}>
             <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] transition-all hover:border-[#7B6FFF30] hover:bg-white/[0.04]">
               {post.coverImage ? (
@@ -200,12 +202,33 @@ export default function BlogPage() {
                   <img
                     src={post.coverImage}
                     alt={post.title}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.parentElement?.classList.add("fallback-bg");
+                    }}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
               ) : (
-                <div className="flex aspect-[16/10] items-center justify-center bg-gradient-to-br from-[#7B6FFF10] to-[#00E5B808]">
-                  <BookOpen size={32} className="text-white/10" />
+                <div
+                  className="relative flex aspect-[16/10] items-center justify-center overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, ${categoryColor}22 0%, ${categoryColor}08 50%, #00E5B808 100%)`,
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: `radial-gradient(circle at 20% 30%, ${categoryColor}40 0%, transparent 40%), radial-gradient(circle at 80% 70%, #00E5B830 0%, transparent 40%)`,
+                    }}
+                  />
+                  <div className="relative z-10 flex flex-col items-center gap-2 text-center px-4">
+                    <BookOpen size={28} style={{ color: `${categoryColor}AA` }} />
+                    <span className="font-syne text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40">
+                      {post.category?.name ?? "Nuul.mn"}
+                    </span>
+                  </div>
                 </div>
               )}
               <div className="flex flex-1 flex-col p-5">
@@ -213,8 +236,8 @@ export default function BlogPage() {
                   <span
                     className="mb-2 w-fit rounded-full px-2.5 py-0.5 text-[10px] font-medium"
                     style={{
-                      backgroundColor: `${post.category.color ?? "#7B6FFF"}18`,
-                      color: post.category.color ?? "#9F98FF",
+                      backgroundColor: `${categoryColor}18`,
+                      color: categoryColor,
                     }}
                   >
                     {post.category.name}
@@ -223,9 +246,13 @@ export default function BlogPage() {
                 <h3 className="mb-2 line-clamp-2 font-syne text-[15px] font-bold leading-snug">
                   {post.title}
                 </h3>
-                {post.excerpt && (
+                {post.excerpt ? (
                   <p className="mb-3 line-clamp-2 flex-1 text-[12px] leading-relaxed text-white/40">
                     {post.excerpt}
+                  </p>
+                ) : (
+                  <p className="mb-3 line-clamp-2 flex-1 text-[12px] leading-relaxed text-white/25 italic">
+                    Дэлгэрэнгүй унших...
                   </p>
                 )}
                 <div className="mt-auto flex items-center gap-3 text-[11px] text-white/30">
@@ -242,7 +269,8 @@ export default function BlogPage() {
               </div>
             </article>
           </Link>
-        ))}
+          );
+        })}
 
         {posts.data?.posts?.length === 0 && (
           <div className="col-span-full py-20 text-center text-white/30">
