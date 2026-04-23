@@ -99,7 +99,7 @@ export default function AdminServicesPage() {
           onClick={() => setTab("services")}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all ${
             tab === "services"
-              ? "bg-[#7B6FFF] text-white"
+              ? "bg-v text-white"
               : "text-white/50 hover:text-white/70"
           }`}
         >
@@ -113,7 +113,7 @@ export default function AdminServicesPage() {
           }}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all ${
             tab === "quotes"
-              ? "bg-[#7B6FFF] text-white"
+              ? "bg-v text-white"
               : "text-white/50 hover:text-white/70"
           }`}
         >
@@ -171,7 +171,7 @@ export default function AdminServicesPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="rounded-full bg-[#7B6FFF12] px-2.5 py-0.5 text-[11px] text-[#9F98FF]">
+                      <span className="rounded-full bg-v/[0.08] px-2.5 py-0.5 text-[11px] text-v-soft">
                         {svc.category?.name ?? "—"}
                       </span>
                     </td>
@@ -220,7 +220,7 @@ export default function AdminServicesPage() {
               }}
               className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all ${
                 !statusFilter
-                  ? "bg-[#7B6FFF20] text-[#9F98FF]"
+                  ? "bg-v/15 text-v-soft"
                   : "text-white/40 hover:text-white/60"
               }`}
             >
@@ -235,7 +235,7 @@ export default function AdminServicesPage() {
                 }}
                 className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all ${
                   statusFilter === s
-                    ? "bg-[#7B6FFF20] text-[#9F98FF]"
+                    ? "bg-v/15 text-v-soft"
                     : "text-white/40 hover:text-white/60"
                 }`}
               >
@@ -319,11 +319,11 @@ export default function AdminServicesPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="rounded-lg p-1.5 text-white/40 transition-all hover:bg-white/[0.06] disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-white/60 transition-all hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <ChevronLeft size={14} />
                   </button>
-                  <span className="text-[12px] text-white/60">
+                  <span className="px-2 text-[12px] font-medium text-white/70">
                     {page} / {quotesQuery.data.totalPages}
                   </span>
                   <button
@@ -333,7 +333,7 @@ export default function AdminServicesPage() {
                       )
                     }
                     disabled={page === quotesQuery.data.totalPages}
-                    className="rounded-lg p-1.5 text-white/40 transition-all hover:bg-white/[0.06] disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-white/60 transition-all hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -444,7 +444,7 @@ export default function AdminServicesPage() {
                 <button
                   onClick={() => generateDocs.mutate({ quoteId: selectedQuote.id })}
                   disabled={generateDocs.isPending}
-                  className="flex items-center gap-2 rounded-xl bg-[#7B6FFF] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_0_16px_#7B6FFF40] transition-all hover:bg-[#6B5FEF] disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl bg-v px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_0_16px_rgba(108,99,255,0.35)] transition-all hover:bg-v-dark disabled:opacity-50"
                 >
                   {generateDocs.isPending ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -460,7 +460,7 @@ export default function AdminServicesPage() {
                       onClick={() => setDocPreview("proposal")}
                       className={`rounded-xl border px-4 py-2.5 text-[13px] font-medium transition-all ${
                         docPreview === "proposal"
-                          ? "border-[#7B6FFF40] bg-[#7B6FFF15] text-[#9F98FF]"
+                          ? "border-v/30 bg-v/10 text-v-soft"
                           : "border-white/[0.08] text-white/50 hover:text-white/70"
                       }`}
                     >
@@ -470,7 +470,7 @@ export default function AdminServicesPage() {
                       onClick={() => setDocPreview("contract")}
                       className={`rounded-xl border px-4 py-2.5 text-[13px] font-medium transition-all ${
                         docPreview === "contract"
-                          ? "border-[#7B6FFF40] bg-[#7B6FFF15] text-[#9F98FF]"
+                          ? "border-v/30 bg-v/10 text-v-soft"
                           : "border-white/[0.08] text-white/50 hover:text-white/70"
                       }`}
                     >

@@ -211,12 +211,16 @@ export function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`group mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+                    aria-current={isActive ? "page" : undefined}
+                    className={`group relative mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                       isActive
-                        ? "bg-v/10 text-v-soft"
+                        ? "bg-v/15 text-white shadow-[inset_0_0_0_1px_rgba(108,99,255,0.25)]"
                         : "text-txt-2 hover:bg-white/[0.03] hover:text-txt"
                     }`}
                   >
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-v" />
+                    )}
                     <Icon
                       size={17}
                       className={isActive ? "text-v" : "text-txt-3 group-hover:text-txt-2"}

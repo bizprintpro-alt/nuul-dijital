@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc-client";
 import slugify from "slugify";
+import dynamic from "next/dynamic";
+import ImageUpload from "@/components/editor/ImageUpload";
 import {
   Plus,
   FileText,
@@ -16,6 +18,11 @@ import {
   Loader2,
   Star,
 } from "lucide-react";
+
+const RichTextEditor = dynamic(
+  () => import("@/components/editor/RichTextEditor"),
+  { ssr: false, loading: () => <div className="h-[350px] rounded-xl border border-white/[0.08] bg-white/[0.02]" /> }
+);
 
 const statusColors: Record<string, string> = {
   DRAFT: "bg-yellow-500/15 text-yellow-400",
@@ -317,46 +324,33 @@ export default function AdminBlogPage() {
 
               <div>
                 <label className="mb-1.5 block text-[12px] font-medium text-white/50">
-                  Агуулга (HTML) *
+                  Агуулга *
                 </label>
-                <textarea
+                <RichTextEditor
                   value={form.content}
-                  onChange={(e) =>
-                    setForm({ ...form, content: e.target.value })
-                  }
-                  rows={10}
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 font-mono text-[12px] text-white outline-none focus:border-[#7B6FFF40]"
-                  placeholder="<h2>Гарчиг</h2><p>Агуулга энд...</p>"
+                  onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+                  placeholder="Нийтлэлийн агуулгаа энд бичнэ үү..."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1.5 block text-[12px] font-medium text-white/50">
-                    Зургийн URL
-                  </label>
-                  <input
-                    value={form.coverImage}
-                    onChange={(e) =>
-                      setForm({ ...form, coverImage: e.target.value })
-                    }
-                    className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none focus:border-[#7B6FFF40]"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-[12px] font-medium text-white/50">
-                    Видео URL
-                  </label>
-                  <input
-                    value={form.videoUrl}
-                    onChange={(e) =>
-                      setForm({ ...form, videoUrl: e.target.value })
-                    }
-                    className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none focus:border-[#7B6FFF40]"
-                    placeholder="https://youtube.com/..."
-                  />
-                </div>
+              <ImageUpload
+                label="Нүүр зураг (Facebook share-д харагдах)"
+                value={form.coverImage}
+                onChange={(url) => setForm((f) => ({ ...f, coverImage: url }))}
+              />
+
+              <div>
+                <label className="mb-1.5 block text-[12px] font-medium text-white/50">
+                  Нэмэлт видео URL (сонголтоор)
+                </label>
+                <input
+                  value={form.videoUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, videoUrl: e.target.value })
+                  }
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] text-white outline-none focus:border-[#7B6FFF40]"
+                  placeholder="https://youtube.com/..."
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -607,6 +601,29 @@ export default function AdminBlogPage() {
           </table>
         </div>
 
+        {!postsQuery.isLoading && postsQuery.data?.posts?.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.04]">
+              <FileText size={20} className="text-white/30" />
+            </div>
+            <div>
+              <div className="text-[14px] font-medium text-white/80">
+                Нийтлэл байхгүй байна
+              </div>
+              <div className="mt-1 text-[12px] text-white/40">
+                Эхний нийтлэлээ үүсгэж эхлээрэй
+              </div>
+            </div>
+            <button
+              onClick={openCreate}
+              className="mt-2 flex items-center gap-2 rounded-xl bg-v px-4 py-2 text-[12px] font-bold text-white transition-all hover:bg-v-dark"
+            >
+              <Plus size={13} />
+              Шинэ нийтлэл
+            </button>
+          </div>
+        )}
+
         {/* Pagination */}
         {postsQuery.data && postsQuery.data.totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-white/[0.06] px-5 py-3">
@@ -617,11 +634,11 @@ export default function AdminBlogPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded-lg p-1.5 text-white/40 transition-all hover:bg-white/[0.06] disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-white/60 transition-all hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-[12px] text-white/60">
+              <span className="px-2 text-[12px] font-medium text-white/70">
                 {page} / {postsQuery.data.totalPages}
               </span>
               <button
@@ -631,7 +648,7 @@ export default function AdminBlogPage() {
                   )
                 }
                 disabled={page === postsQuery.data.totalPages}
-                className="rounded-lg p-1.5 text-white/40 transition-all hover:bg-white/[0.06] disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-white/60 transition-all hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronRight size={14} />
               </button>

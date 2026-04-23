@@ -217,7 +217,7 @@ export default function AdminResellersPage() {
                         ₮{w.amount.toLocaleString()}
                       </span>
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
                           w.status === "PENDING"
                             ? "bg-[#FFB02E]/15 text-[#FFB02E]"
                             : "bg-v/15 text-v-soft"

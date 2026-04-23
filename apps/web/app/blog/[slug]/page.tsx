@@ -20,17 +20,46 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await prisma.blogPost.findUnique({
     where: { slug: params.slug },
-    select: { title: true, excerpt: true, coverImage: true },
+    select: {
+      title: true,
+      excerpt: true,
+      coverImage: true,
+      publishedAt: true,
+      author: { select: { name: true } },
+      tags: true,
+    },
   });
 
   if (!post) return { title: "Not Found" };
 
+  const url = `https://nuul.mn/blog/${params.slug}`;
+  const description = post.excerpt ?? `${post.title} | Nuul.mn`;
+  const images = post.coverImage
+    ? [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }]
+    : undefined;
+
   return {
     title: `${post.title} | Nuul.mn Блог`,
-    description: post.excerpt ?? undefined,
+    description,
+    alternates: { canonical: url },
+    keywords: post.tags,
+    authors: post.author?.name ? [{ name: post.author.name }] : undefined,
     openGraph: {
+      type: "article",
+      url,
+      siteName: "Nuul.mn",
       title: post.title,
-      description: post.excerpt ?? undefined,
+      description,
+      images,
+      locale: "mn_MN",
+      publishedTime: post.publishedAt?.toISOString(),
+      authors: post.author?.name ? [post.author.name] : undefined,
+      tags: post.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
       images: post.coverImage ? [post.coverImage] : undefined,
     },
   };

@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
                     <td className="py-3 pr-4 text-txt-2">{u.email}</td>
                     <td className="py-3 pr-4">
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${roleColors[u.role as Role]}`}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${roleColors[u.role as Role]}`}
                       >
                         {u.role}
                       </span>
@@ -190,8 +190,18 @@ export default function AdminUsersPage() {
         )}
 
         {!isLoading && users.length === 0 && (
-          <div className="py-12 text-center text-[13px] text-txt-3">
-            Хэрэглэгч олдсонгүй
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.04]">
+              <Users size={20} className="text-txt-3" />
+            </div>
+            <div>
+              <div className="text-[14px] font-medium text-white/80">
+                Хэрэглэгч олдсонгүй
+              </div>
+              <div className="mt-1 text-[12px] text-txt-3">
+                Хайлт эсвэл шүүлтүүрээ өөрчилж үзнэ үү
+              </div>
+            </div>
           </div>
         )}
 

@@ -391,14 +391,14 @@ export default function AdminPage() {
                   <div className="flex items-center gap-3">
                     {a.kind === "order" && (
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${statusColor(a.status)}`}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${statusColor(a.status)}`}
                       >
                         {statusLabels[a.status] ?? a.status}
                       </span>
                     )}
                     {a.kind === "user" && (
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${roleColor(a.role)}`}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${roleColor(a.role)}`}
                       >
                         {a.role}
                       </span>

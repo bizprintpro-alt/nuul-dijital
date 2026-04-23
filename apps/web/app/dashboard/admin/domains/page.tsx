@@ -156,7 +156,7 @@ export default function AdminDomainsPage() {
                     </td>
                     <td className="py-3 pr-4">
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${statusColors[d.status] ?? "bg-white/[0.06] text-txt-3"}`}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${statusColors[d.status] ?? "bg-white/[0.06] text-txt-3"}`}
                       >
                         {statusLabels[d.status] ?? d.status}
                       </span>
@@ -177,8 +177,18 @@ export default function AdminDomainsPage() {
         )}
 
         {!isLoading && domains.length === 0 && (
-          <div className="py-12 text-center text-[13px] text-txt-3">
-            Хайлтад тохирох домэйн олдсонгүй
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.04]">
+              <Globe size={20} className="text-txt-3" />
+            </div>
+            <div>
+              <div className="text-[14px] font-medium text-white/80">
+                Домэйн олдсонгүй
+              </div>
+              <div className="mt-1 text-[12px] text-txt-3">
+                Хайлт эсвэл шүүлтүүрээ өөрчилж үзнэ үү
+              </div>
+            </div>
           </div>
         )}
 
