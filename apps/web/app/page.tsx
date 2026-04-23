@@ -14,6 +14,73 @@ const services: Array<{
   icon: React.ReactNode;
 }> = [
   {
+    name: "Дижитал маркетинг",
+    desc: "Facebook, Instagram, Google Ads — зорилтот хэрэглэгчид хүргэж борлуулалтыг нэмэгдүүлнэ",
+    tag: "ROI 3-5x",
+    iconBg: "#7B6FFF18",
+    iconBorder: "#7B6FFF25",
+    tagBg: "#7B6FFF12",
+    tagColor: "#9F98FF",
+    glow: "#7B6FFF40",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+        <path d="M2 12L6 8L9 11L14 4" stroke="#7B6FFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 4L14 4L14 8" stroke="#7B6FFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    name: "FB контент бүүст",
+    desc: "Facebook post, reels, story контент бүтээж зорилтот audience-д хүргэнэ",
+    tag: "Сарын багц",
+    iconBg: "#00E5B815",
+    iconBorder: "#00E5B825",
+    tagBg: "#00E5B812",
+    tagColor: "#00E5B8",
+    glow: "#00E5B840",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+        <path d="M10 2L13 2L13 5" stroke="#00E5B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M13 2L8 7" stroke="#00E5B8" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M6 4L3 4C2.4 4 2 4.4 2 5L2 13C2 13.6 2.4 14 3 14L11 14C11.6 14 12 13.6 12 13L12 10" stroke="#00E5B8" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    name: "Вэбсайт хийх",
+    featureKey: "feature_website_builder",
+    desc: "Таны бизнест тохирсон мэргэжлийн вэбсайтыг загвартайгаар хийж өгнө",
+    tag: "Загвар 50+",
+    iconBg: "#FFB02E18",
+    iconBorder: "#FFB02E25",
+    tagBg: "#FFB02E12",
+    tagColor: "#FFB02E",
+    glow: "#FFB02E40",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="3" width="12" height="8" rx="1.5" stroke="#FFB02E" strokeWidth="1.3" />
+        <line x1="5" y1="13" x2="11" y2="13" stroke="#FFB02E" strokeWidth="1.5" />
+        <line x1="8" y1="11" x2="8" y2="13" stroke="#FFB02E" strokeWidth="1.3" />
+      </svg>
+    ),
+  },
+  {
+    name: "AI Чатбот",
+    featureKey: "feature_chatbot",
+    desc: "Монгол хэлтэй AI. Facebook, вэбсайт, Viber-д зэрэг ажиллаж харилцагчидтай харилцана",
+    tag: "94% автомат",
+    iconBg: "#9F98FF18",
+    iconBorder: "#9F98FF25",
+    tagBg: "#9F98FF12",
+    tagColor: "#9F98FF",
+    glow: "#9F98FF40",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+        <path d="M3 11L2 14L5.5 12.5C6.2 13.1 7 13.5 8 13.5C11.1 13.5 13.5 11.4 13.5 8.8C13.5 6.2 11.1 4 8 4C4.9 4 2.5 6.2 2.5 8.8C2.5 9.6 2.7 10.4 3 11Z" stroke="#9F98FF" strokeWidth="1.3" />
+      </svg>
+    ),
+  },
+  {
     name: "Домэйн & Хост",
     featureKey: "feature_domain",
     desc: ".mn .com .org хаягаа хайж олоод минутын дотор идэвхжүүл",
@@ -28,40 +95,6 @@ const services: Array<{
         <circle cx="8" cy="8" r="5.5" stroke="#7B6FFF" strokeWidth="1.3" />
         <ellipse cx="8" cy="8" rx="2.5" ry="5.5" stroke="#7B6FFF" strokeWidth="1.1" />
         <line x1="2.5" y1="8" x2="13.5" y2="8" stroke="#7B6FFF" strokeWidth="1.1" />
-      </svg>
-    ),
-  },
-  {
-    name: "Вэбсайт Builder",
-    featureKey: "feature_website_builder",
-    desc: "Drag & drop загварчлал. 10 минутад бэлэн болох мэргэжлийн сайт",
-    tag: "Загвар 50+",
-    iconBg: "#00E5B815",
-    iconBorder: "#00E5B825",
-    tagBg: "#00E5B812",
-    tagColor: "#00E5B8",
-    glow: "#00E5B840",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="3" width="12" height="8" rx="1.5" stroke="#00E5B8" strokeWidth="1.3" />
-        <line x1="5" y1="13" x2="11" y2="13" stroke="#00E5B8" strokeWidth="1.5" />
-        <line x1="8" y1="11" x2="8" y2="13" stroke="#00E5B8" strokeWidth="1.3" />
-      </svg>
-    ),
-  },
-  {
-    name: "AI Чатбот",
-    featureKey: "feature_chatbot",
-    desc: "Монгол хэлтэй AI. Facebook, вэбсайт, Viber-д зэрэг ажилладаг",
-    tag: "94% автомат",
-    iconBg: "#FFB02E18",
-    iconBorder: "#FFB02E25",
-    tagBg: "#FFB02E12",
-    tagColor: "#FFB02E",
-    glow: "#FFB02E40",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-        <path d="M3 11L2 14L5.5 12.5C6.2 13.1 7 13.5 8 13.5C11.1 13.5 13.5 11.4 13.5 8.8C13.5 6.2 11.1 4 8 4C4.9 4 2.5 6.2 2.5 8.8C2.5 9.6 2.7 10.4 3 11Z" stroke="#FFB02E" strokeWidth="1.3" />
       </svg>
     ),
   },
@@ -152,40 +185,42 @@ const testimonials = [
 const pricingPlans = [
   {
     name: "Starter",
-    price: "₮99,000",
-    desc: "Эхлэгч бизнест тохирсон",
+    price: "₮490,000",
+    desc: "Шинээр эхэлж буй бизнест",
     features: [
-      "1 домэйн + хост",
-      "Бэлэн загварт вэбсайт",
-      "SSL + 5 имэйл хаяг",
-      "Дэмжлэг 9–18 цаг",
+      "Сарын 8 FB контент",
+      "Facebook page удирдлага",
+      "1 рекламын кампанит ажил",
+      "Сар бүр тайлан",
+      "Имэйл дэмжлэг",
     ],
     featured: false,
-    btnText: "Эхлэх",
+    btnText: "Санал авах",
   },
   {
-    name: "Business",
-    price: "₮249,000",
-    desc: "Өсөн дэвших бизнест",
+    name: "Growth",
+    price: "₮1,200,000",
+    desc: "Өсөлтөд бэлтгэж буй бизнест",
     features: [
-      "5 домэйн + cloud хост",
-      "CRM + имэйл маркетинг",
-      "AI чатбот Facebook + вэб",
-      "QPay / SocialPay",
-      "AI дэмжлэг 24/7",
+      "Сарын 16 FB + IG контент",
+      "Google + Meta Ads удирдлага",
+      "AI чатбот суулгах & тохируулах",
+      "Сар бүр дэлгэрэнгүй тайлан",
+      "Чат + утсаар дэмжлэг",
     ],
     featured: true,
-    btnText: "Одоо эхлэх",
+    btnText: "Санал авах",
   },
   {
     name: "Enterprise",
     price: "Тохиролцоно",
-    desc: "Том байгууллагад",
+    desc: "Том брэнд, байгууллагад",
     features: [
-      "Хязгааргүй домэйн & хост",
-      "ERP / Odoo нэвтрүүлэлт",
-      "Call center + Callpro",
-      "Dedicated manager",
+      "Бүтэн маркетинг багаар",
+      "Вэбсайт + Landing page хийх",
+      "Call center + CRM суурилуулах",
+      "Стратеги & brand identity",
+      "Dedicated account manager",
     ],
     featured: false,
     btnText: "Холбоо барих",
@@ -212,39 +247,39 @@ export default function HomePage() {
         {/* Eyebrow */}
         <div className="mb-7 inline-flex animate-fadeUp items-center gap-2 rounded-full border border-[#7B6FFF35] bg-[#7B6FFF12] px-4 py-1.5 text-[11.5px] font-medium tracking-[0.04em] text-v-soft">
           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-t shadow-[0_0_8px_var(--t)]" />
-          Монголын анхны AI-powered платформ
+          Монголын дижитал маркетинг агентлаг
         </div>
 
         {/* H1 */}
         <h1 className="mb-6 animate-fadeUp font-clash text-[clamp(48px,7vw,88px)] font-bold leading-none tracking-[-3px] [animation-delay:0.1s]">
-          <span className="block text-txt">Таны бизнесийн</span>
-          <span className="text-gradient-v-t block">дижитал үүл</span>
+          <span className="block text-txt">Бизнесээ дижитал</span>
+          <span className="text-gradient-v-t block">ертөнцөд өсгөнө</span>
           <span className="block text-[0.65em] text-txt/45">
-            Домэйн · Хост · Вэб · CRM · AI
+            Маркетинг · Вэбсайт · Чатбот · FB контент
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mb-10 max-w-[520px] animate-fadeUp text-base leading-relaxed text-txt-2 [animation-delay:0.2s]">
-          Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ.
+        <p className="mb-10 max-w-[560px] animate-fadeUp text-base leading-relaxed text-txt-2 [animation-delay:0.2s]">
+          Вэбсайт, чатбот, дижитал маркетинг, FB контент — бид хийж өгнө.
           <br />
-          Бүгдийг нэг дороос. Автомат. Хялбар. 24/7.
+          Та бизнесээ өсгөхөд анхаарна.
         </p>
 
         {/* CTA */}
         <div className="mb-16 flex animate-fadeUp flex-wrap justify-center gap-3.5 [animation-delay:0.3s]">
           <Link
-            href="/dashboard"
+            href="#contact"
             className="relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-v to-v-dark px-8 py-3.5 font-cabinet text-[15px] font-bold text-white shadow-[0_0_30px_#7B6FFF40,inset_0_1px_0_#FFFFFF25] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_40px_#7B6FFF50]"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 2L14 8L8 14M14 8H2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Үнэгүй эхлэх
+            Үнийн санал авах
           </Link>
-          <button className="rounded-xl border border-[--bdv] bg-bg-3 px-8 py-3.5 font-cabinet text-[15px] font-medium text-txt-2 transition-all hover:border-v hover:bg-bg-4 hover:text-txt">
-            Демо үзэх →
-          </button>
+          <Link href="/services" className="rounded-xl border border-[--bdv] bg-bg-3 px-8 py-3.5 font-cabinet text-[15px] font-medium text-txt-2 transition-all hover:border-v hover:bg-bg-4 hover:text-txt">
+            Үйлчилгээ үзэх →
+          </Link>
         </div>
 
         {/* Stats */}
@@ -604,19 +639,19 @@ export default function HomePage() {
             </p>
             <div className="relative z-10 flex justify-center gap-3">
               <Link
-                href="/dashboard"
+                href="/contact"
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-br from-v to-v-dark px-8 py-3.5 font-cabinet text-[15px] font-bold text-white shadow-[0_0_30px_#7B6FFF40] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_40px_#7B6FFF50]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M8 2L14 8L8 14M14 8H2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Үнэгүй эхлэх
+                Үнийн санал авах
               </Link>
               <Link
-                href="/dashboard"
+                href="/services"
                 className="rounded-xl border border-[--bdv] bg-bg-3 px-8 py-3.5 font-cabinet text-[15px] font-medium text-txt-2 transition-all hover:border-v hover:bg-bg-4 hover:text-txt"
               >
-                Холбоо барих
+                Үйлчилгээ үзэх
               </Link>
             </div>
             <div className="relative z-10 mt-5 inline-flex items-center gap-1.5 text-[11px] text-txt-3">
