@@ -270,9 +270,27 @@ export function Sidebar() {
           {/* User dropdown menu */}
           {userMenuOpen && (
             <div className="absolute bottom-full left-4 right-4 mb-2 overflow-hidden rounded-xl border border-white/[0.06] bg-bg-3 shadow-xl">
+              <Link
+                href="/dashboard/settings"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex w-full items-center gap-2.5 px-4 py-3 text-[12px] text-txt-2 transition-all hover:bg-white/[0.03] hover:text-txt"
+              >
+                <Settings size={14} />
+                Профайл & Тохиргоо
+              </Link>
+              {userRole === "ADMIN" && (
+                <Link
+                  href="/dashboard/admin/settings"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex w-full items-center gap-2.5 border-t border-white/[0.04] px-4 py-3 text-[12px] text-txt-2 transition-all hover:bg-white/[0.03] hover:text-txt"
+                >
+                  <Shield size={14} />
+                  Сайтын тохиргоо
+                </Link>
+              )}
               <button
                 onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-                className="flex w-full items-center gap-2.5 px-4 py-3 text-[12px] text-red-400 transition-all hover:bg-white/[0.03]"
+                className="flex w-full items-center gap-2.5 border-t border-white/[0.04] px-4 py-3 text-[12px] text-red-400 transition-all hover:bg-white/[0.03]"
               >
                 <LogOut size={14} />
                 Гарах

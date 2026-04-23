@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc-client";
 import { Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -24,11 +25,21 @@ function Skeleton({ className = "" }: { className?: string }) {
 }
 
 export default function AdminUsersPage() {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+  const [search, setSearch] = useState(initialQuery);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery);
   const [roleFilter, setRoleFilter] = useState<Role | undefined>(undefined);
   const [page, setPage] = useState(1);
   const limit = 20;
+
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    if (q) {
+      setSearch(q);
+      setDebouncedSearch(q);
+    }
+  }, [searchParams]);
 
   const utils = trpc.useUtils();
 

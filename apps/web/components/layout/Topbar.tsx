@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Search, Plus, Menu, Globe, Server, ShoppingCart, Bot, Mail, X } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { useSidebar } from "./SidebarContext";
@@ -18,7 +19,21 @@ const quickActions = [
 export function Topbar() {
   const { toggle } = useSidebar();
   const router = useRouter();
+  const { data: session } = useSession();
   const [showActions, setShowActions] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const userRole = (session?.user as { role?: string })?.role ?? "CLIENT";
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    if (!q) return;
+    const target = userRole === "ADMIN"
+      ? `/dashboard/admin/users?q=${encodeURIComponent(q)}`
+      : `/dashboard/domains`;
+    router.push(target);
+    setSearchValue("");
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[0.04] bg-bg/80 px-4 backdrop-blur-xl lg:px-8">
@@ -33,17 +48,19 @@ export function Topbar() {
         </button>
 
         {/* Search */}
-        <div className="relative hidden flex-1 sm:block sm:max-w-md">
+        <form onSubmit={handleSearch} className="relative hidden flex-1 sm:block sm:max-w-md">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-txt-3" />
           <input
             type="text"
-            placeholder="Хайх... (домэйн, захиалга, харилцагч)"
-            className="h-9 w-full rounded-lg border border-white/[0.06] bg-white/[0.02] pl-9 pr-4 text-[13px] text-txt outline-none transition-all placeholder:text-txt-3 focus:border-v/30 focus:bg-white/[0.04]"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={userRole === "ADMIN" ? "Хэрэглэгч хайх..." : "Домэйн хайх..."}
+            className="h-9 w-full rounded-lg border border-white/[0.06] bg-white/[0.02] pl-9 pr-12 text-[13px] text-txt outline-none transition-all placeholder:text-txt-3 focus:border-v/30 focus:bg-white/[0.04]"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-white/[0.06] bg-white/[0.03] px-1.5 py-0.5 text-[10px] text-txt-3">
-            ⌘K
+            ↵
           </kbd>
-        </div>
+        </form>
       </div>
 
       {/* Right side */}
