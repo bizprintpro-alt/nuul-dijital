@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc-client";
 import { Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
@@ -25,6 +25,14 @@ function Skeleton({ className = "" }: { className?: string }) {
 }
 
 export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={<div className="p-6"><div className="h-8 w-48 animate-pulse rounded bg-bg-3" /></div>}>
+      <AdminUsersInner />
+    </Suspense>
+  );
+}
+
+function AdminUsersInner() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
   const [search, setSearch] = useState(initialQuery);
