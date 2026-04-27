@@ -1480,6 +1480,10 @@ async function main() {
     { key: "site_description", value: "Монголын #1 дижитал платформ — домэйн, хостинг, вэбсайт, AI чатбот", type: "string", group: "general", label: "Тайлбар" },
     { key: "site_logo", value: "/images/logo.svg", type: "string", group: "general", label: "Лого" },
     { key: "site_favicon", value: "/images/favicon.ico", type: "string", group: "general", label: "Favicon" },
+    { key: "hero_video_url", value: "https://videos.pexels.com/video-files/3129957/3129957-uhd_3840_2160_25fps.mp4", type: "string", group: "general", label: "Нүүр хуудасны hero видео URL" },
+    { key: "hero_headline", value: "Бизнесээ дижитал\nертөнцөд өсгөнө.", type: "string", group: "general", label: "Hero гарчиг (\\n мөр таслана)" },
+    { key: "hero_subheadline", value: "Вэбсайт, чатбот, маркетинг, FB контент — бид хийж өгнө. Та бизнесээ өсгөнө.", type: "string", group: "general", label: "Hero дэд тайлбар" },
+    { key: "hero_tag", value: "Маркетинг. Вэбсайт. Чатбот.", type: "string", group: "general", label: "Hero tag (баруун доод)" },
     // Contact
     { key: "contact_email", value: "info@nuul.mn", type: "string", group: "contact", label: "Холбоо барих имэйл" },
     { key: "contact_phone", value: "+976 7711-8800", type: "string", group: "contact", label: "Утасны дугаар" },

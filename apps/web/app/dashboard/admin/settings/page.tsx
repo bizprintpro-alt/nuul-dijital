@@ -24,6 +24,11 @@ const DEFAULTS: Record<string, Record<string, string>> = {
     site_tagline: "Таны дижитал үүл",
     site_description:
       "Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ. Домэйн, хостинг, AI чатбот, CRM.",
+    hero_video_url: "",
+    hero_headline: "Бизнесээ дижитал\nертөнцөд өсгөнө.",
+    hero_subheadline:
+      "Вэбсайт, чатбот, маркетинг, FB контент — бид хийж өгнө. Та бизнесээ өсгөнө.",
+    hero_tag: "Маркетинг. Вэбсайт. Чатбот.",
   },
   contact: {
     contact_phone: "+976 9911-2233",
@@ -247,6 +252,75 @@ export default function AdminSettingsPage() {
                   onChange={(e) => updateLocal("site_description", e.target.value)}
                   className="w-full resize-none rounded-lg border border-white/[0.06] bg-bg-3 px-4 py-2.5 text-sm text-txt outline-none transition-colors focus:border-v/30"
                 />
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.06] pt-5">
+              <h3 className="mb-1 font-syne text-base font-semibold text-txt">
+                Нүүр хуудасны Hero хэсэг
+              </h3>
+              <p className="mb-4 text-[12px] text-txt-3">
+                Үндсэн хуудсанд харагдах видео background, гарчиг, тайлбарыг тохируулна
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-txt-2">
+                    Hero видео URL
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.hero_video_url ?? ""}
+                    onChange={(e) => updateLocal("hero_video_url", e.target.value)}
+                    placeholder="https://...mp4 (хоосон бол gradient харагдана)"
+                    className="w-full rounded-lg border border-white/[0.06] bg-bg-3 px-4 py-2.5 text-sm text-txt outline-none transition-colors focus:border-v/30"
+                  />
+                  <p className="mt-1 text-[11px] text-txt-3">
+                    Pexels, Pixabay, эсвэл өөрсдийн CDN дээр хадгалагдсан .mp4 видеоны URL.
+                    Хоосон үлдээвэл анимацилсан gradient харагдана.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-txt-2">
+                    Hero гарчиг
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={settings.hero_headline ?? ""}
+                    onChange={(e) => updateLocal("hero_headline", e.target.value)}
+                    placeholder="Бизнесээ дижитал\nертөнцөд өсгөнө."
+                    className="w-full resize-none rounded-lg border border-white/[0.06] bg-bg-3 px-4 py-2.5 text-sm text-txt outline-none transition-colors focus:border-v/30"
+                  />
+                  <p className="mt-1 text-[11px] text-txt-3">
+                    Шинэ мөр болгохын тулд \n тэмдэгт ашиглана уу
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-txt-2">
+                    Hero дэд тайлбар
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={settings.hero_subheadline ?? ""}
+                    onChange={(e) => updateLocal("hero_subheadline", e.target.value)}
+                    className="w-full resize-none rounded-lg border border-white/[0.06] bg-bg-3 px-4 py-2.5 text-sm text-txt outline-none transition-colors focus:border-v/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-txt-2">
+                    Hero tag (баруун доод glass card)
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.hero_tag ?? ""}
+                    onChange={(e) => updateLocal("hero_tag", e.target.value)}
+                    placeholder="Маркетинг. Вэбсайт. Чатбот."
+                    className="w-full rounded-lg border border-white/[0.06] bg-bg-3 px-4 py-2.5 text-sm text-txt outline-none transition-colors focus:border-v/30"
+                  />
+                </div>
               </div>
             </div>
 

@@ -4,8 +4,24 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { Marquee } from "@/components/marquee";
 import { FAQ } from "@/components/landing/FAQ";
 import { ServiceGrid } from "@/components/landing/ServiceGrid";
-import { PublicNav } from "@/components/layout/PublicNav";
+import { LiquidGlassHero } from "@/components/landing/LiquidGlassHero";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import { prisma } from "@/lib/prisma";
+
+async function getHeroSettings() {
+  const rows = await prisma.siteSetting.findMany({
+    where: {
+      key: { in: ["hero_video_url", "hero_headline", "hero_subheadline", "hero_tag"] },
+    },
+  });
+  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  return {
+    videoUrl: map.hero_video_url || undefined,
+    headline: map.hero_headline || undefined,
+    subheadline: map.hero_subheadline || undefined,
+    tag: map.hero_tag || undefined,
+  };
+}
 
 /* ── Service data ── */
 const services: Array<{
@@ -228,91 +244,30 @@ const pricingPlans = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const heroSettings = await getHeroSettings().catch(() => ({
+    videoUrl: undefined,
+    headline: undefined,
+    subheadline: undefined,
+    tag: undefined,
+  }));
+
   return (
     <>
-      {/* ── Mesh BG ── */}
+      {/* ── HERO (Liquid Glass with video bg) ── */}
+      <LiquidGlassHero
+        videoUrl={heroSettings.videoUrl}
+        headline={heroSettings.headline}
+        subheadline={heroSettings.subheadline}
+        tag={heroSettings.tag}
+      />
+
+      {/* ── Mesh BG (behind rest of page) ── */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute -left-[150px] -top-[200px] h-[700px] w-[700px] animate-drift1 rounded-full bg-[radial-gradient(circle,#7B6FFF22_0%,transparent_65%)]" />
         <div className="absolute -bottom-[150px] -right-[100px] h-[600px] w-[600px] animate-drift2 rounded-full bg-[radial-gradient(circle,#00E5B815_0%,transparent_65%)]" />
-        <div className="absolute left-1/2 top-[40%] h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-drift3 rounded-full bg-[radial-gradient(circle,#7B6FFF18_0%,transparent_65%)]" />
       </div>
       <div className="grid-bg" />
-
-      {/* ── NAV ── */}
-      <PublicNav />
-
-      {/* ── HERO ── */}
-      <section className="relative z-[2] flex min-h-screen flex-col items-center justify-center px-6 pb-20 pt-[120px] text-center sm:px-12">
-        {/* Eyebrow */}
-        <div className="mb-7 inline-flex animate-fadeUp items-center gap-2 rounded-full border border-[#7B6FFF35] bg-[#7B6FFF12] px-4 py-1.5 text-[11.5px] font-medium tracking-[0.04em] text-v-soft">
-          <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-t shadow-[0_0_8px_var(--t)]" />
-          Монголын дижитал маркетинг агентлаг
-        </div>
-
-        {/* H1 */}
-        <h1 className="mb-6 animate-fadeUp font-clash text-[clamp(48px,7vw,88px)] font-bold leading-none tracking-[-3px] [animation-delay:0.1s]">
-          <span className="block text-txt">Бизнесээ дижитал</span>
-          <span className="text-gradient-v-t block">ертөнцөд өсгөнө</span>
-          <span className="block text-[0.65em] text-txt/45">
-            Маркетинг · Вэбсайт · Чатбот · FB контент
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="mb-10 max-w-[560px] animate-fadeUp text-base leading-relaxed text-txt-2 [animation-delay:0.2s]">
-          Вэбсайт, чатбот, дижитал маркетинг, FB контент — бид хийж өгнө.
-          <br />
-          Та бизнесээ өсгөхөд анхаарна.
-        </p>
-
-        {/* CTA */}
-        <div className="mb-16 flex animate-fadeUp flex-wrap justify-center gap-3.5 [animation-delay:0.3s]">
-          <Link
-            href="#contact"
-            className="relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-v to-v-dark px-8 py-3.5 font-cabinet text-[15px] font-bold text-white shadow-[0_0_30px_#7B6FFF40,inset_0_1px_0_#FFFFFF25] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_40px_#7B6FFF50]"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2L14 8L8 14M14 8H2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Үнийн санал авах
-          </Link>
-          <Link href="/services" className="rounded-xl border border-[--bdv] bg-bg-3 px-8 py-3.5 font-cabinet text-[15px] font-medium text-txt-2 transition-all hover:border-v hover:bg-bg-4 hover:text-txt">
-            Үйлчилгээ үзэх →
-          </Link>
-        </div>
-
-        {/* Stats */}
-        <div className="flex animate-fadeUp overflow-hidden rounded-2xl border border-[--bdv] bg-gradient-to-br from-[#7B6FFF08] to-[#00E5B806] backdrop-blur-sm [animation-delay:0.4s]">
-          {[
-            { n: "1,284+", l: "Харилцагч" },
-            { n: "99.9%", l: "Uptime" },
-            { n: "24/7", l: "AI дэмжлэг" },
-            { n: "4 сек", l: "Хариу хугацаа" },
-            { n: "40%", l: "Зардал хэмнэлт" },
-          ].map((s, i) => (
-            <div key={s.l} className="relative px-6 py-5 text-center sm:px-9">
-              {i > 0 && (
-                <div className="absolute bottom-[20%] left-0 top-[20%] w-px bg-gradient-to-b from-transparent via-[--bdv] to-transparent" />
-              )}
-              <div className="text-gradient-txt-vg font-clash text-2xl font-bold tracking-tight">
-                {s.n}
-              </div>
-              <div className="mt-0.5 text-[11px] font-medium tracking-[0.04em] text-txt-3">
-                {s.l}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-9 left-1/2 flex -translate-x-1/2 animate-fadeUp flex-col items-center gap-2 [animation-delay:0.6s]">
-          <span className="text-[10px] uppercase tracking-[0.1em] text-txt-3">
-            scroll
-          </span>
-          <div className="h-10 w-px animate-scroll-line bg-gradient-to-b from-[--bdv] to-transparent" />
-        </div>
-      </section>
 
       {/* ── MARQUEE ── */}
       <Marquee />
