@@ -23,6 +23,67 @@ async function getHeroSettings() {
   };
 }
 
+async function getPricingPlans() {
+  return prisma.marketingPlan.findMany({
+    where: { isActive: true },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+const FALLBACK_PRICING_PLANS = [
+  {
+    id: "fallback-starter",
+    name: "Starter",
+    price: "₮490,000",
+    priceSmall: false,
+    description: "Шинээр эхэлж буй бизнест",
+    features: [
+      "Сарын 8 FB контент",
+      "Facebook page удирдлага",
+      "1 рекламын кампанит ажил",
+      "Сар бүр тайлан",
+      "Имэйл дэмжлэг",
+    ],
+    featured: false,
+    btnText: "Санал авах",
+    btnLink: "/contact",
+  },
+  {
+    id: "fallback-growth",
+    name: "Growth",
+    price: "₮1,200,000",
+    priceSmall: false,
+    description: "Өсөлтөд бэлтгэж буй бизнест",
+    features: [
+      "Сарын 16 FB + IG контент",
+      "Google + Meta Ads удирдлага",
+      "AI чатбот суулгах & тохируулах",
+      "Сар бүр дэлгэрэнгүй тайлан",
+      "Чат + утсаар дэмжлэг",
+    ],
+    featured: true,
+    btnText: "Санал авах",
+    btnLink: "/contact",
+  },
+  {
+    id: "fallback-enterprise",
+    name: "Enterprise",
+    price: "Тохиролцоно",
+    priceSmall: true,
+    description: "Том брэнд, байгууллагад",
+    features: [
+      "Бүтэн маркетинг багаар",
+      "Вэбсайт + Landing page хийх",
+      "Call center + CRM суурилуулах",
+      "Стратеги & brand identity",
+      "Dedicated account manager",
+    ],
+    featured: false,
+    btnText: "Холбоо барих",
+    btnLink: "/contact",
+  },
+];
+
 /* ── Service data ── */
 const services: Array<{
   name: string; desc: string; tag: string; featureKey?: string;
@@ -198,52 +259,6 @@ const testimonials = [
   },
 ];
 
-const pricingPlans = [
-  {
-    name: "Starter",
-    price: "₮490,000",
-    desc: "Шинээр эхэлж буй бизнест",
-    features: [
-      "Сарын 8 FB контент",
-      "Facebook page удирдлага",
-      "1 рекламын кампанит ажил",
-      "Сар бүр тайлан",
-      "Имэйл дэмжлэг",
-    ],
-    featured: false,
-    btnText: "Санал авах",
-  },
-  {
-    name: "Growth",
-    price: "₮1,200,000",
-    desc: "Өсөлтөд бэлтгэж буй бизнест",
-    features: [
-      "Сарын 16 FB + IG контент",
-      "Google + Meta Ads удирдлага",
-      "AI чатбот суулгах & тохируулах",
-      "Сар бүр дэлгэрэнгүй тайлан",
-      "Чат + утсаар дэмжлэг",
-    ],
-    featured: true,
-    btnText: "Санал авах",
-  },
-  {
-    name: "Enterprise",
-    price: "Тохиролцоно",
-    desc: "Том брэнд, байгууллагад",
-    features: [
-      "Бүтэн маркетинг багаар",
-      "Вэбсайт + Landing page хийх",
-      "Call center + CRM суурилуулах",
-      "Стратеги & brand identity",
-      "Dedicated account manager",
-    ],
-    featured: false,
-    btnText: "Холбоо барих",
-    priceSmall: true,
-  },
-];
-
 export default async function HomePage() {
   const heroSettings = await getHeroSettings().catch(() => ({
     videoUrl: undefined,
@@ -251,6 +266,9 @@ export default async function HomePage() {
     subheadline: undefined,
     tag: undefined,
   }));
+
+  const dbPlans = await getPricingPlans().catch(() => []);
+  const pricingPlans = dbPlans.length > 0 ? dbPlans : FALLBACK_PRICING_PLANS;
 
   return (
     <>
@@ -321,7 +339,7 @@ export default async function HomePage() {
           <div className="grid items-start gap-4 md:grid-cols-3">
             {pricingPlans.map((plan) => (
               <div
-                key={plan.name}
+                key={plan.id}
                 className={`relative overflow-hidden rounded-2xl border p-8 transition-all hover:-translate-y-1 ${
                   plan.featured
                     ? "border-[--bdv] bg-gradient-to-br from-bg-3 to-bg-4 shadow-[0_0_40px_#7B6FFF18] hover:-translate-y-1.5 hover:shadow-[0_12px_50px_#7B6FFF25]"
@@ -353,7 +371,7 @@ export default async function HomePage() {
                     </span>
                   )}
                 </div>
-                <div className="mb-6 text-xs text-txt-3">{plan.desc}</div>
+                <div className="mb-6 text-xs text-txt-3">{plan.description}</div>
                 <div className="mb-5 h-px bg-gradient-to-r from-transparent via-[--bdv] to-transparent" />
                 <div className="mb-6 flex flex-col gap-2.5">
                   {plan.features.map((f) => (
@@ -376,7 +394,7 @@ export default async function HomePage() {
                   ))}
                 </div>
                 <Link
-                  href="/dashboard"
+                  href={plan.btnLink}
                   className={`block w-full rounded-[10px] py-3 text-center font-cabinet text-[13px] font-bold transition-all ${
                     plan.featured
                       ? "bg-gradient-to-br from-v to-v-dark text-white shadow-[0_0_20px_#7B6FFF30] hover:-translate-y-0.5 hover:shadow-[0_0_30px_#7B6FFF50]"

@@ -573,6 +573,26 @@ model BlogCategory {
   @@map("blog_categories")
 }
 
+// ===================== MARKETING PLANS =====================
+
+model MarketingPlan {
+  id          String   @id @default(cuid())
+  name        String
+  price       String
+  priceSmall  Boolean  @default(false)
+  description String
+  features    String[]
+  featured    Boolean  @default(false)
+  btnText     String   @default("Санал авах")
+  btnLink     String   @default("/contact")
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("marketing_plans")
+}
+
 // ===================== SITE SETTINGS =====================
 
 model SiteSetting {

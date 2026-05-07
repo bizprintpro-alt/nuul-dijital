@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, ChevronDown,
   Shield, LogOut, Crown, X, Settings, Briefcase, FileText, LayoutList,
+  DollarSign,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSidebar } from "./SidebarContext";
@@ -14,7 +15,7 @@ import { useSidebar } from "./SidebarContext";
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield, Crown, Settings,
-  Briefcase, FileText, LayoutList,
+  Briefcase, FileText, LayoutList, DollarSign,
 };
 
 interface NavItem {
@@ -73,6 +74,7 @@ const navGroups: NavGroup[] = [
       { label: "Бүх домэйн", href: "/dashboard/admin/domains", icon: "Globe" },
       { label: "Reseller удирдлага", href: "/dashboard/admin/resellers", icon: "Crown" },
       { label: "Хостинг планууд", href: "/dashboard/admin/hosting", icon: "Server" },
+      { label: "Маркетинг багц", href: "/dashboard/admin/pricing", icon: "DollarSign" },
       { label: "Тохиргоо", href: "/dashboard/admin/settings", icon: "Settings" },
     ],
   },
