@@ -30,6 +30,51 @@ async function getPricingPlans() {
   });
 }
 
+async function getTestimonials() {
+  return prisma.testimonial.findMany({
+    where: { isActive: true },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+const TESTIMONIAL_COLORS: Record<string, { avBg: string; avColor: string; avBorder: string }> = {
+  violet: { avBg: "#7B6FFF22", avColor: "#A89FFF", avBorder: "#7B6FFF30" },
+  teal:   { avBg: "#00E5B815", avColor: "#00E5B8", avBorder: "#00E5B825" },
+  amber:  { avBg: "#FFB02E18", avColor: "#FFB02E", avBorder: "#FFB02E25" },
+  pink:   { avBg: "#FF6B9D18", avColor: "#FF6B9D", avBorder: "#FF6B9D25" },
+  blue:   { avBg: "#5BA5FF18", avColor: "#5BA5FF", avBorder: "#5BA5FF25" },
+};
+
+const FALLBACK_TESTIMONIALS = [
+  {
+    id: "fallback-1",
+    text: "10 минутад вэбсайтаа бэлэн болголоо. Домэйноосоо чатбот хүртэл нэг дороос шийдсэн нь маш хялбар байлаа. Өмнө нь ингэж хялбар байх юм гэж бодоогүй.",
+    name: "Батбаяр Д.",
+    role: "Кофе шоп эзэн",
+    avatar: "Б",
+    color: "violet",
+    rating: 5,
+  },
+  {
+    id: "fallback-2",
+    text: "Өмнө нь 3 компанид төлж байсан. Nuul нэг төлбөрт бүгдийг оруулж өгсөн. Сарын зардал 40% буурсан. Хамгийн сайн шийдвэрүүдийн нэг болсон.",
+    name: "Номин Г.",
+    role: "Онлайн дэлгүүр",
+    avatar: "Н",
+    color: "teal",
+    rating: 5,
+  },
+  {
+    id: "fallback-3",
+    text: "AI чатбот маань 24/7 хариулж байна. Ажилтангүйгээр хоногт 50+ хэрэглэгчтэй харилцдаг болсон. Орлого 30% өссөн.",
+    name: "Энхбаяр С.",
+    role: "Маркетинг агентлаг",
+    avatar: "Э",
+    color: "amber",
+    rating: 5,
+  },
+];
+
 const FALLBACK_PRICING_PLANS = [
   {
     id: "fallback-starter",
@@ -229,36 +274,6 @@ const services: Array<{
   },
 ];
 
-const testimonials = [
-  {
-    text: "10 минутад вэбсайтаа бэлэн болголоо. Домэйноосоо чатбот хүртэл нэг дороос шийдсэн нь маш хялбар байлаа. Өмнө нь ингэж хялбар байх юм гэж бодоогүй.",
-    name: "Батбаяр Д.",
-    role: "Кофе шоп эзэн",
-    avatar: "Б",
-    avBg: "#7B6FFF22",
-    avColor: "#A89FFF",
-    avBorder: "#7B6FFF30",
-  },
-  {
-    text: "Өмнө нь 3 компанид төлж байсан. Nuul нэг төлбөрт бүгдийг оруулж өгсөн. Сарын зардал 40% буурсан. Хамгийн сайн шийдвэрүүдийн нэг болсон.",
-    name: "Номин Г.",
-    role: "Онлайн дэлгүүр",
-    avatar: "Н",
-    avBg: "#00E5B815",
-    avColor: "#00E5B8",
-    avBorder: "#00E5B825",
-  },
-  {
-    text: "AI чатбот маань 24/7 хариулж байна. Ажилтангүйгээр хоногт 50+ хэрэглэгчтэй харилцдаг болсон. Орлого 30% өссөн.",
-    name: "Энхбаяр С.",
-    role: "Маркетинг агентла��",
-    avatar: "Э",
-    avBg: "#FFB02E18",
-    avColor: "#FFB02E",
-    avBorder: "#FFB02E25",
-  },
-];
-
 export default async function HomePage() {
   const heroSettings = await getHeroSettings().catch(() => ({
     videoUrl: undefined,
@@ -269,6 +284,11 @@ export default async function HomePage() {
 
   const dbPlans = await getPricingPlans().catch(() => []);
   const pricingPlans = dbPlans.length > 0 ? dbPlans : FALLBACK_PRICING_PLANS;
+
+  const dbTestimonials = await getTestimonials().catch(() => []);
+  const testimonials = (dbTestimonials.length > 0 ? dbTestimonials : FALLBACK_TESTIMONIALS).map(
+    (t) => ({ ...t, ...(TESTIMONIAL_COLORS[t.color] ?? TESTIMONIAL_COLORS.violet) })
+  );
 
   return (
     <>
@@ -423,13 +443,13 @@ export default async function HomePage() {
           <div className="grid gap-4 md:grid-cols-3">
             {testimonials.map((t) => (
               <div
-                key={t.name}
+                key={t.id}
                 className="group relative overflow-hidden rounded-2xl border border-[--bd] bg-bg-2 p-7 transition-all hover:-translate-y-0.5 hover:border-[--bdv]"
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[--bdv] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 {/* Stars */}
                 <div className="mb-3.5 flex gap-1">
-                  {Array(5)
+                  {Array(t.rating ?? 5)
                     .fill(0)
                     .map((_, i) => (
                       <div

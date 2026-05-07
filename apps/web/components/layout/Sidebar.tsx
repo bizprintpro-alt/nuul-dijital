@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, ChevronDown,
   Shield, LogOut, Crown, X, Settings, Briefcase, FileText, LayoutList,
-  DollarSign,
+  DollarSign, MessageSquareQuote,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSidebar } from "./SidebarContext";
@@ -15,7 +15,7 @@ import { useSidebar } from "./SidebarContext";
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard, Globe, Server, Cloud, PanelsTopLeft, ShoppingCart,
   Mail, Bot, Users, Phone, BarChart3, Receipt, Headphones, Shield, Crown, Settings,
-  Briefcase, FileText, LayoutList, DollarSign,
+  Briefcase, FileText, LayoutList, DollarSign, MessageSquareQuote,
 };
 
 interface NavItem {
@@ -90,6 +90,7 @@ const navGroups: NavGroup[] = [
     roles: ["ADMIN"],
     items: [
       { label: "Үйлчилгээ", href: "/dashboard/admin/services", icon: "Briefcase" },
+      { label: "Сэтгэгдэл", href: "/dashboard/admin/testimonials", icon: "MessageSquareQuote" },
       { label: "Блог", href: "/dashboard/admin/blog", icon: "FileText" },
       { label: "Меню удирдлага", href: "/dashboard/admin/navigation", icon: "LayoutList" },
     ],
