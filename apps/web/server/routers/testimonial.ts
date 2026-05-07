@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { revalidatePath } from "next/cache";
 import { router, publicProcedure, protectedProcedure, prisma } from "@/lib/trpc";
 
 const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
@@ -44,7 +45,9 @@ export const testimonialRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return prisma.testimonial.create({ data: input });
+      const result = await prisma.testimonial.create({ data: input });
+      revalidatePath("/");
+      return result;
     }),
 
   adminUpdate: adminProcedure
@@ -63,13 +66,17 @@ export const testimonialRouter = router({
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
-      return prisma.testimonial.update({ where: { id }, data });
+      const result = await prisma.testimonial.update({ where: { id }, data });
+      revalidatePath("/");
+      return result;
     }),
 
   adminDelete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      return prisma.testimonial.delete({ where: { id: input.id } });
+      const result = await prisma.testimonial.delete({ where: { id: input.id } });
+      revalidatePath("/");
+      return result;
     }),
 
   adminSeedDefaults: adminProcedure.mutation(async () => {
@@ -108,6 +115,7 @@ export const testimonialRouter = router({
         },
       ],
     });
+    revalidatePath("/");
     return { ok: true };
   }),
 });

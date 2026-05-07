@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { revalidatePath } from "next/cache";
 import { router, publicProcedure, protectedProcedure, prisma } from "@/lib/trpc";
 
 const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
@@ -44,7 +45,9 @@ export const marketingRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return prisma.marketingPlan.create({ data: input });
+      const result = await prisma.marketingPlan.create({ data: input });
+      revalidatePath("/");
+      return result;
     }),
 
   adminUpdate: adminProcedure
@@ -65,13 +68,17 @@ export const marketingRouter = router({
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
-      return prisma.marketingPlan.update({ where: { id }, data });
+      const result = await prisma.marketingPlan.update({ where: { id }, data });
+      revalidatePath("/");
+      return result;
     }),
 
   adminDelete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      return prisma.marketingPlan.delete({ where: { id: input.id } });
+      const result = await prisma.marketingPlan.delete({ where: { id: input.id } });
+      revalidatePath("/");
+      return result;
     }),
 
   adminSeedDefaults: adminProcedure.mutation(async () => {
@@ -130,6 +137,7 @@ export const marketingRouter = router({
         },
       ],
     });
+    revalidatePath("/");
     return { ok: true };
   }),
 });

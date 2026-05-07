@@ -1,3 +1,5 @@
+export const revalidate = 300;
+
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { Marquee } from "@/components/marquee";
 import { DomainSearch } from "@/components/domain-search";
