@@ -1,20 +1,39 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://nuul.mn";
+const TITLE = "Nuul.mn — Монголын дижитал маркетинг агентлаг";
+const DESCRIPTION =
+  "Дижитал маркетинг, FB контент бүүст, вэбсайт хийх, AI чатбот — Монголын бизнесүүдэд зориулсан иж бүрэн агентлаг үйлчилгээ.";
+
 export const metadata: Metadata = {
-  title: "Nuul.mn — Монголын дижитал платформ | Домэйн, Хостинг, AI",
-  description: "Домэйн бүртгэл, хостинг, вэбсайт builder, CRM, AI чатбот — бүгдийг нэг дороос. Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ.",
-  keywords: "домэйн mn, хостинг монгол, вэбсайт хийх, CRM систем, AI чатбот монгол, nuul.mn, QPay",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s | Nuul.mn",
+  },
+  description: DESCRIPTION,
+  keywords:
+    "дижитал маркетинг монгол, FB контент, facebook ads, вэбсайт хийх, AI чатбот монгол, маркетинг агентлаг, домэйн mn, хостинг монгол, CRM, nuul.mn, QPay",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Nuul.mn — Таны дижитал үүл",
-    description: "Монголын бизнесүүдэд зориулсан иж бүрэн дижитал платформ. Домэйн, хостинг, AI чатбот, CRM.",
-    url: "https://nuul.mn",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
     siteName: "Nuul.mn",
     locale: "mn_MN",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "Nuul.mn — Монголын дижитал платформ" },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

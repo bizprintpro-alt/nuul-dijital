@@ -4,8 +4,16 @@ import { PublicNav } from "@/components/layout/PublicNav";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "Бидний тухай — Nuul.mn",
-  description: "Nuul.mn — Монголын бизнесүүдийг дижитал ертөнцөд хүргэх иж бүрэн платформ.",
+  title: "Бидний тухай",
+  description:
+    "Nuul.mn — Монголын бизнесүүдийг дижитал ертөнцөд хүргэх маркетинг агентлаг. Манай түүх, баг, зорилго.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "Бидний тухай — Nuul.mn",
+    description: "Монголын бизнесүүдэд зориулсан дижитал маркетинг агентлагийн тухай.",
+    url: "/about",
+    type: "website",
+  },
 };
 
 const stats = [
