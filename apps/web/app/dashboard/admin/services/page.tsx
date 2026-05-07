@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -72,7 +71,7 @@ export default function AdminServicesPage() {
   });
 
   const generateDocs = trpc.services.adminGenerateDocs.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setSelectedQuote(data);
       quotesQuery.refetch();
     },

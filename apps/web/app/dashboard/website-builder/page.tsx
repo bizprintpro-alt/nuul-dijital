@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -25,11 +24,11 @@ export default function WebsiteBuilderPage() {
   const utils = trpc.useUtils();
   const { data: websites, isLoading } = trpc.website.getWebsites.useQuery();
   const createMutation = trpc.website.createWebsite.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: { id: string }) => {
       setShowModal(false);
       router.push(`/dashboard/website-builder/editor/${data.id}`);
     },
-    onError: (err) => setError(err.message),
+    onError: (err: { message: string }) => setError(err.message),
   });
   const publishMutation = trpc.website.publishWebsite.useMutation({
     onSuccess: () => utils.website.getWebsites.invalidate(),
